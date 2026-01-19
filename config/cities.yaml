@@ -1,0 +1,104 @@
+cities:
+  # Chile : Zona Norte
+  - name: Arica
+    lat: -18.48
+    lon: -70.31
+
+  - name: Iquique
+    lat: -20.22
+    lon: -70.14
+
+  - name: Antofagasta
+    lat: -23.65
+    lon: -70.40
+
+  - name: Calama
+    lat: -22.45
+    lon: -68.93
+
+  - name: La Serena
+    lat: -29.90
+    lon: -71.25
+
+  # Chile: Zona Centro
+  - name: Valparaiso
+    lat: -33.05
+    lon: -71.62
+
+  - name: Santiago
+    lat: -33.45
+    lon: -70.66
+
+  - name: Rancagua
+    lat: -34.17
+    lon: -70.74
+
+  - name: Talca
+    lat: -35.42
+    lon: -71.66
+
+  - name: Chillan
+    lat: -36.61
+    lon: -72.10
+
+  # Chile: Zona Sur
+  - name: Concepcion
+    lat: -36.82
+    lon: -73.05
+
+  - name: Temuco
+    lat: -38.74
+    lon: -72.60
+
+  - name: Valdivia
+    lat: -39.82
+    lon: -73.24
+
+  - name: Puerto Montt
+    lat: -41.47
+    lon: -72.94
+
+  - name: Punta Arenas
+    lat: -53.16
+    lon: -70.91
+
+  # Sudamérica (Extra)
+  - name: Buenos Aires
+    lat: -34.61
+    lon: -58.38
+
+  - name: Lima
+    lat: -12.04
+    lon: -77.03
+
+  - name: Bogota
+    lat: 4.71
+    lon: -74.07
+
+  - name: Sao Paulo
+    lat: -23.55
+    lon: -46.63
+
+  - name: Rio de Janeiro
+    lat: -22.91
+    lon: -43.17
+
+  - name: Montevideo
+    lat: -34.90
+    lon: -56.16
+
+  - name: La Paz
+    lat: -16.50
+    lon: -68.15
+
+  - name: Quito
+    lat: -0.18
+    lon: -78.47
+
+  - name: Asuncion
+    lat: -25.26
+    lon: -57.57
+
+  - name: Caracas
+    lat: 10.48
+    lon: -66.90

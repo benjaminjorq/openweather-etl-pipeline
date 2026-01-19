@@ -1,0 +1,20 @@
+# entorno virtual
+venv/
+.venv
+
+# variables de entorno (secretos)
+.env
+
+# logs
+logs/
+*.log
+
+# cache de python
+__pycache__/
+*.pyc
+
+# Datos del pipeline 
+data/
+
+# Cache de pruebas (AGREGA ESTO)
+.pytest_cache/
