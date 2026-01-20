@@ -21,20 +21,17 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 * **Fuente:** API OpenWeather (Endpoints `/weather` y `/air_pollution`).
 * **Proceso:** Extracción vía `requests` validando códigos de estado HTTP (200 OK).
 * **Almacenamiento:** Archivos JSON crudos guardados localmente para auditoría histórica.
-* **Manejo de Errores:** Logging de fallos de conexión o respuestas vacías.
 
 ### 2. 🥈 Silver Layer (Limpieza y Normalización)
 * **Transformación:**
     * **Flattening:** Aplanamiento de estructuras JSON anidadas (diccionarios dentro de listas) usando Python y Pandas.
-    * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados por ciudad/fecha y filtrado de valores atípicos (ej. temperaturas > 60°C o < -90°C).
-* **Almacenamiento:** Archivos **CSV** particionados por fecha (`year=YYYY/month=MM/day=DD`) para optimizar la organización.
+    * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
+* **Almacenamiento:** Archivos **CSV** con particionamiento tipo Hive (`year=YYYY/month=MM/day=DD`) para optimizar la organización y consulta.
 * **Carga DB:** Ingesta de datos limpios hacia **PostgreSQL** mediante `SQLAlchemy`.
 
 ### 3. 🥇 Gold Layer (Reportes de Negocio)
 * **Lógica de Negocio:** Enriquecimiento de datos aplicando reglas de clasificación (ej. Calidad de aire "Peligrosa" si PM2.5 > 55).
-* **Outputs Generados:**
-    * **Ranking de Polución:** Top 5 ciudades con peor calidad de aire.
-    * **Resumen Nacional:** Agrupación (`groupby`) por país con promedios de temperatura y contaminantes.
+* **Outputs Generados:** Rankings de contaminación y resúmenes nacionales agrupados.
 
 ---
 
@@ -53,14 +50,20 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 ```bash
 openweather-etl-pipeline/
-├── config/              # Listado de ciudades (YAML) y configuraciones
-├── data/                # Data Lake local (Bronze/Silver/Gold)
+├── config/              # Configuraciones (YAML)
+├── data/                # Data Lake Local
+│   ├── bronze/          # Raw JSONs
+│   ├── silver/          # Datos Limpios (Particionados)
+│   │   └── year=YYYY/month=MM/day=DD/
+│   └── gold/            # Reportes de Negocio
+│       ├── ranking/     # Top contaminación (.csv)
+│       └── summary/     # Promedios por país (.csv)
 ├── pipeline/            # Código fuente modular
-│   ├── ingestion/       # batch_ingest.py (API -> JSON)
-│   ├── transform/       # batch_transform.py (JSON -> CSV Clean)
-│   ├── load/            # load_database.py (CSV -> PostgreSQL)
-│   └── reports_to_gold/ # gold_report.py (Generación de KPIs)
+│   ├── ingestion/       # batch_ingest.py
+│   ├── transform/       # batch_transform.py
+│   ├── load/            # load_database.py
+│   └── reports_to_gold/ # gold_report.py
 ├── pytests/             # Pruebas unitarias
-├── Dockerfile           # Definición de imagen del entorno
+├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Orquestación de servicios
-└── requirements.txt     # Dependencias del proyecto
+└── requirements.txt     # Dependencias
