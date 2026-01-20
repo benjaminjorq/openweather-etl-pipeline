@@ -70,6 +70,7 @@ openweather-etl-pipeline/
 └── requirements.txt     # Dependencias
 
 
+---
 
 ## Apache Airflow
 
