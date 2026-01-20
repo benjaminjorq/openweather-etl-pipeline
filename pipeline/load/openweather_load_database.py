@@ -74,8 +74,8 @@ def start_database_load():
 
         engine = get_db_engine()
         
-        df.to_sql("weather_silver_table", engine, if_exists="append", index=False, schema="public")
-
+        with engine.begin() as connection:
+            df.to_sql(name="weather_silver_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
         logging.info(f"Carga exitosa: {len(df)} registros insertados en PostgreSQL.")
         
     except Exception as e:
