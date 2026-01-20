@@ -11,8 +11,9 @@ Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado 
 
 El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
 
-<img width="1209" height="738" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
-
+<div align="center">
+  <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
+</div>
 
 ## 🏗️ Arquitectura de Datos
 
@@ -41,7 +42,7 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
 
 * **Ingeniería:** `Python`, `Pandas` (Manipulación de DataFrames), `SQLAlchemy` (Gestión de Conexión de Base de Datos).
-* **Infraestructura:** `Docker` & `Docker Compose` (Sistema aislado)
+* **Infraestructura:** `Docker` & `Docker Compose` (Gestión del entorno aislado)
 * **Configuración:** `PyYAML` (Gestión de config de ciudades), `Python-dotenv` (Variables de entorno seguras).
 * **Calidad:** `Pytest` (Tests unitarios), `Logging` (Trazabilidad de ejecución).
 
@@ -52,6 +53,7 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 ```bash
 openweather-etl-pipeline/
 ├── config/              # Configuraciones (YAML)
+├── dags/                # Orquestación (DAGs de Airflow)
 ├── data/                # Data Lake Local
 │   ├── bronze/          # Raw JSONs
 │   ├── silver/          # Datos Limpios (Particionados)
@@ -67,12 +69,3 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Orquestación de servicios
-└── requirements.txt     # Dependencias
-
-
----
-
-## Apache Airflow
-
-En desarrollo..
-
