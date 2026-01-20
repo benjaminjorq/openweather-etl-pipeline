@@ -16,5 +16,5 @@ __pycache__/
 # Datos del pipeline 
 data/
 
-# Cache de pruebas (AGREGA ESTO)
+# Cache de pruebas
 .pytest_cache/

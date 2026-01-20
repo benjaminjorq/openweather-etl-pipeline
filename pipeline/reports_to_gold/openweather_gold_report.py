@@ -64,7 +64,7 @@ def label_co_level(co):
     elif co <= 9400:
         return "Moderada"
     elif co <= 12400:
-        return "Danina"
+        return "Dañina"
     else: 
         return "Peligrosa"
     
@@ -78,7 +78,7 @@ def label_no2_level(no2):
     elif no2 <= 90:
         return "Moderada"
     elif no2 <= 120:
-        return "Danina"
+        return "Dañina"
     else: 
         return "Peligrosa"
     
@@ -92,7 +92,7 @@ def label_o3_level(o3):
     elif o3 <= 120:
         return "Moderada"
     elif o3 <= 180:
-        return "Danina"
+        return "Dañina"
     else: 
         return "Peligrosa"
 
