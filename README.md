@@ -5,13 +5,11 @@
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-150458?style=for-the-badge&logo=pandas&logoColor=white)
 
-## 📖 Sobre el Proyecto
+##  Sobre el Proyecto
 
-Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather, procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
+Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather (Current Weather Data & Air Pollution), procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
 
 El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
-
-El proyecto se encuentra actualmente en desarrollo en el proceso de Orquestación (Apache Airflow)... con fecha máxima para la carga de códigos al repositorio (DAG's) (24-01-2026)
 
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
