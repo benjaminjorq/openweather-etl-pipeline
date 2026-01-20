@@ -114,6 +114,6 @@ openweather-etl-pipeline/
 │   └── reports_to_gold/ # gold_report.py
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
-├── docker-compose.yml   # Orquestación de servicios
+├── docker-compose.yml   # Configuración Docker
 
 
