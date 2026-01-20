@@ -71,3 +71,9 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Orquestación de servicios
+
+
+### 📈 Evidencia de Ejecución
+![Airflow DAG Run] <img width="965" height="275" alt="graph airflow" src="https://github.com/user-attachments/assets/d7f1a7f6-6b54-4f6f-9c3b-d1601cf509b1" />
+
+*Vista del DAG en Airflow mostrando la ejecución exitosa de todas las tareas.*
