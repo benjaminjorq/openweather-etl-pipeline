@@ -50,8 +50,10 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 ---
 
-### 📈 Evidencia de Ejecución
-![Airflow DAG Run](ruta/a/tu/imagen.png)
+### 📈 Apache Airflow
+
+<img width="965" height="275" alt="graph airflow" src="https://github.com/user-attachments/assets/28a59102-26b0-451a-a09c-b1a7b39b27f8" />
+
 *Vista del DAG en Airflow mostrando la ejecución exitosa de todas las tareas.*
 
 ---
