@@ -50,9 +50,9 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 ---
 
-## Orquestación y Monitoreo
+## ⚙️ Orquestación
 
-Para garantizar la robustez y escalabilidad del pipeline, se utiliza **Apache Airflow** como orquestador central. Esto permite gestionar las dependencias entre tareas, manejar reintentos automáticos y asegurar una trazabilidad total de cada ejecución.
+La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
 <p align="center">
   <img width="965" alt="graph airflow" src="https://github.com/user-attachments/assets/28a59102-26b0-451a-a09c-b1a7b39b27f8" />
@@ -62,7 +62,7 @@ Para garantizar la robustez y escalabilidad del pipeline, se utiliza **Apache Ai
 
 ---
 
-### Apache Airflow - Monitoreo y Logs
+### 📑 Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
 
