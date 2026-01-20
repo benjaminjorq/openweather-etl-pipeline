@@ -7,11 +7,12 @@
 
 ## 📖 Sobre el Proyecto
 
-Este proyecto implementa un pipeline de datos **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather, procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
+Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather, procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
 
 El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
 
----
+<img width="1209" height="738" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
+
 
 ## 🏗️ Arquitectura de Datos
 
