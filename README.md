@@ -73,9 +73,5 @@ openweather-etl-pipeline/
 
 ## Apache Airflow
 
-En desarrollo...
-
-
-
-
+En desarrollo..
 
