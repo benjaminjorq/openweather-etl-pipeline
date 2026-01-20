@@ -11,6 +11,8 @@ Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado 
 
 El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
 
+El proyecto se encuentra actualmente en desarrollo en el proceso de Orquestación (Apache Airflow)... con fecha máxima (24-01-2016)
+
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
 </div>
