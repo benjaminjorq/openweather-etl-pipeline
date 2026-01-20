@@ -18,4 +18,4 @@ data/
 
 # Cache de pruebas
 .pytest_cache/
-pytest.ini
+
