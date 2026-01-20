@@ -3,15 +3,18 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# 1. Configuración de Directorios
-LOG_DIR = Path("logs")
-SILVER_FOLDER = Path("data/silver")
-GOLD_FOLDER = Path("data/gold")
+# 1. Configuración de Rutas
+
+BASE_DIR = Path("/opt/airflow")
+LOG_DIR = BASE_DIR / "logs"
+SILVER_FOLDER = BASE_DIR / "data/silver"
+GOLD_FOLDER = BASE_DIR / "data/gold"
 
 RANKING_DIR = GOLD_FOLDER / "ranking"
 SUMMARY_DIR = GOLD_FOLDER / "summary"
 
 # 2. Creación de carpetas
+
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 GOLD_FOLDER.mkdir(parents=True, exist_ok=True)
 RANKING_DIR.mkdir(parents=True, exist_ok=True)
@@ -109,7 +112,7 @@ def create_gold_reports():
         logging.warning("No hay carpeta Silver de hoy")
         return
 
-    files = list(path.glob("clean_data_*.csv"))
+    files = list(path.glob("clean_weather_data_*.csv"))
     if not files: return
     
     latest_file = max(files, key=lambda f: f.stat().st_mtime)

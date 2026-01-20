@@ -6,9 +6,13 @@ from sqlalchemy import create_engine
 from pathlib import Path
 from datetime import datetime
 
-# 1. Configuración
+# 1. Configuración de Rutas
+
 load_dotenv()
-LOG_DIR = Path("logs")
+
+BASE_DIR = Path("/opt/airflow")
+LOG_DIR = BASE_DIR / "logs"
+SILVER_FOLDER = BASE_DIR / "data/silver"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
@@ -47,14 +51,14 @@ def start_database_load():
     # 4. Localizar partición del día actual
 
     now = datetime.now()
-    todays_path = Path("data/silver") / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
+    todays_path = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
     
     if not todays_path.exists():
         logging.warning("No se encontró carpeta Silver del día actual.")
         return
 
     try:
-        files = list(todays_path.glob("clean_data_*.csv"))
+        files = list(todays_path.glob("clean_weather_data_*.csv"))
         if not files: 
             logging.warning("Carpeta del día vacía.")
             return
@@ -70,7 +74,7 @@ def start_database_load():
 
         engine = get_db_engine()
         
-        df.to_sql("weather_silver_table", engine, if_exists="append", index=False, schema="processed")
+        df.to_sql("weather_silver_table", engine, if_exists="append", index=False, schema="public")
 
         logging.info(f"Carga exitosa: {len(df)} registros insertados en PostgreSQL.")
         

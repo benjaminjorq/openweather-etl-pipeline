@@ -6,9 +6,10 @@ from pathlib import Path
 
 # 1. Configuración de Rutas
 
-LOG_DIR = Path("logs")
-BRONZE_FOLDER = Path("data/bronze")
-SILVER_FOLDER = Path("data/silver")
+BASE_DIR = Path("/opt/airflow")
+LOG_DIR = BASE_DIR / "logs"
+BRONZE_FOLDER = BASE_DIR / "data/bronze"
+SILVER_FOLDER = BASE_DIR / "data/silver"
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 SILVER_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -124,7 +125,7 @@ def start_transformation_process():
             output_dir = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
             output_dir.mkdir(parents=True, exist_ok=True)
             
-            filename = f"clean_data_{now.strftime('%H_%M_%S')}.csv"
+            filename = f"clean_weather_data_{now.strftime('%H_%M_%S')}.csv"
             df.to_csv(output_dir / filename, index=False)
             
             logging.info(f"Transformación completada. CSV guardado: {filename}")

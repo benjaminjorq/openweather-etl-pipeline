@@ -12,9 +12,10 @@ from pathlib import Path
 load_dotenv()
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-LOG_DIR = Path("logs")
-BRONZE_FOLDER = Path("data/bronze")
-CITIES_FILE = Path("config/cities.yaml")
+BASE_DIR = Path("/opt/airflow")
+LOG_DIR = BASE_DIR / "logs"
+BRONZE_FOLDER = BASE_DIR / "data/bronze"
+CITIES_FILE = BASE_DIR / "config/cities.yaml"
 
 # 2. Setup Inicial (Directorios y Logs)
 
