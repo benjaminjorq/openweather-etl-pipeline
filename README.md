@@ -40,8 +40,8 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
 
-* **Ingeniería:** `Python`, `Pandas` (Manipulación de DataFrames), `SQLAlchemy` (ORM/Conector DB).
-* **Infraestructura:** `Docker` & `Docker Compose` (Aislamiento de servicios App + Base de Datos).
+* **Ingeniería:** `Python`, `Pandas` (Manipulación de DataFrames), `SQLAlchemy` (Gestión de Conexión de Base de Datos).
+* **Infraestructura:** `Docker` & `Docker Compose` (Sistema aislado)
 * **Configuración:** `PyYAML` (Gestión de config de ciudades), `Python-dotenv` (Variables de entorno seguras).
 * **Calidad:** `Pytest` (Tests unitarios), `Logging` (Trazabilidad de ejecución).
 
@@ -68,3 +68,14 @@ openweather-etl-pipeline/
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Orquestación de servicios
 └── requirements.txt     # Dependencias
+
+
+
+## Apache Airflow
+
+En desarrollo...
+
+
+
+
+
