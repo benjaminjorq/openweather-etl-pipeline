@@ -100,6 +100,7 @@ def label_o3_level(o3):
         return "Peligrosa"
 
 # 8. Proceso Principal
+
 def create_gold_reports():
     logging.info("Inicio de generación de reportes")
     
@@ -141,21 +142,26 @@ def create_gold_reports():
     ]
     
     # Guardar CSV
+
     ranking_path = RANKING_DIR / f"ranking_pollution_{date_suffix}.csv"
     top5_df[ranking_cols].to_csv(ranking_path, index=False)
     
     # Mostrar tablas en logs
+
     logging.info(f"\nRanking Top 5 Contaminación\n{top5_df[ranking_cols].to_string(index=False)}")
     logging.info(f"Guardado en: {ranking_path.name}")
 
     # Reporte 2: Resumen por pais
+
     summary_df = df.groupby("country")[["temperature_c", "pm2_5_level", "pm10_level","humidity_pct", "co_level", "no2_level", "o3_level"]].mean().reset_index().round(2)
     
     # Guardar CSV
+
     summary_path = SUMMARY_DIR / f"summary_country_{date_suffix}.csv"
     summary_df.to_csv(summary_path)
     
-    # Mostrar tabla en logs
+    # Mostrar tabla en Logs
+
     logging.info(f"\nResumen por País (Vista Previa)\n{summary_df.head().to_string()}")
     logging.info(f"Guardado en: {summary_path.name}")
 
