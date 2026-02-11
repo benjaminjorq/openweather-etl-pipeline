@@ -4,6 +4,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![Airflow](https://img.shields.io/badge/Apache%20Airflow-Orchestration-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
 
 ##  Sobre el Proyecto
 
@@ -92,6 +93,37 @@ Evidencia de la lógica de negocio aplicada: creación de rankings de contaminac
 <img width="944" height="455" alt="log gold" src="https://github.com/user-attachments/assets/414faf12-8739-4e77-8ff7-64a3e04ae2f9" />
 </details>
 
+---
+
+## 🚀 Requerimientos
+
+Antes de comenzar, asegúrate de tener instalado:
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* Una API Key activa de [OpenWeatherMap](https://openweathermap.org/api)
+
+## 🔧 Configuración e Instalación
+
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone [https://github.com/benjaminjorq/openweather-etl.git](https://github.com/benjaminjorq/openweather-etl.git)
+    cd openweather-etl
+    ```
+
+2.  **Configurar variables de entorno:**
+    Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales (puedes usar el archivo `.env.example` como guía):
+    ```env
+    AIRFLOW_UID=50000
+    OPENWEATHER_API_KEY=tu_api_key_aqui
+    POSTGRES_USER=airflow
+    POSTGRES_PASSWORD=airflow
+    POSTGRES_DB=weather_db
+    ```
+
+3.  **Iniciar los servicios:**
+    Ejecuta el siguiente comando para levantar Airflow y PostgreSQL:
+    ```bash
+    docker-compose up -d
+    ```
 ---
 
 ## 📂 Estructura del Repositorio
