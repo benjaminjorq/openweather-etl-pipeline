@@ -5,7 +5,7 @@ from pipeline.transform.openweather_batch_transform import clean_and_normalize
 # 1. Creamos un DataFrame sucio para probar la función clean_and_normalize
 
 def create_raw_dataset():
-    """Simula un set de datos crudos con errores comunes (espacios, nulos, formatos)"""
+    """Simula un set de datos sucios con errores comunes (espacios, nulos, formatos)"""
     raw_data = {
         "city": ["  Concepcion  ", "Santiago"],      # Espacios extra
         "temperature_c": ["15.5", 25.0],            # Mezcla texto/número
