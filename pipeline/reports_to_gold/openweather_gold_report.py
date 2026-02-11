@@ -35,13 +35,13 @@ def label_pm25_level(pm25):
     if pd.isna(pm25): 
         return "Desconocido"
     if pm25 < 12: 
-        return "Buena"
+        return "Bueno"
     elif pm25 <= 35:
-        return "Moderada"
+        return "Moderado"
     elif pm25 <= 55:
-        return "Dañina"
+        return "Dañino"
     else: 
-        return "Peligrosa"
+        return "Peligroso"
 
 # 4. Función: Etiquetar Temperatura
 
@@ -63,9 +63,9 @@ def label_co_level(co):
     if pd.isna(co): 
         return "Desconocido"
     if co < 4400: 
-        return "Buena"
+        return "Bueno"
     elif co <= 9400:
-        return "Moderada"
+        return "Moderado"
     elif co <= 12400:
         return "Dañina"
     else: 
@@ -77,9 +77,9 @@ def label_no2_level(no2):
     if pd.isna(no2): 
         return "Desconocido"
     if no2 < 40: 
-        return "Buena"
+        return "Bueno"
     elif no2 <= 90:
-        return "Moderada"
+        return "Moderado"
     elif no2 <= 120:
         return "Dañina"
     else: 
@@ -91,17 +91,18 @@ def label_o3_level(o3):
     if pd.isna(o3): 
         return "Desconocido"
     if o3 < 60: 
-        return "Buena"
+        return "Bueno"
     elif o3 <= 120:
-        return "Moderada"
+        return "Moderado"
     elif o3 <= 180:
-        return "Dañina"
+        return "Dañino"
     else: 
-        return "Peligrosa"
+        return "Peligroso"
 
 # 8. Proceso Principal
 
 def create_gold_reports():
+
     logging.info("Inicio de generación de reportes")
     
     # A. Buscar archivo Silver
@@ -130,10 +131,11 @@ def create_gold_reports():
 
     # Reporte 1: Ranking
 
-    top5_df = df.sort_values(by="pm2_5_level", ascending=False).head(5)
+    top5_df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False).head(7)
 
     ranking_cols = [
         "city", "country", 
+        "aqi",
         "pm2_5_level", "pm25_label", 
         "co_level", "co_label",
         "no2_level", "no2_label",
@@ -162,7 +164,7 @@ def create_gold_reports():
     
     # Mostrar tabla en Logs
 
-    logging.info(f"\nResumen por País (Vista Previa)\n{summary_df.head().to_string()}")
+    logging.info(f"\nResumen por País (Vista Previa)\n{summary_df.head(5).to_string()}")
     logging.info(f"Guardado en: {summary_path.name}")
 
 if __name__ == "__main__":

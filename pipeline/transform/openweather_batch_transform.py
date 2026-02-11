@@ -52,7 +52,7 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 
     df["processed_timestamp"] = pd.to_datetime(df["processed_timestamp"])
     
-    # Filtros de Calidad
+    # Filtros de Calidad y Validación
 
     df = df.drop_duplicates(subset=["city", "processed_timestamp"])
     df = df.dropna(subset=["city", "temperature_c"])
@@ -79,6 +79,8 @@ def start_transformation_process():
         
         # 5. Aplanamiento de datos (Flattening)
 
+        batch_timestamp = datetime.now().replace(second=0, microsecond=0)    # Hace que todos los datos tengan la misma hora en el output
+
         for record in raw_data:
             try:
                 meta = record.get("city_metadata", {}) # Extrae los metadatos de la ciudad (nombre, lat, lon)
@@ -103,7 +105,7 @@ def start_transformation_process():
                     "o3_level": pollution.get("components", {}).get("o3"),
                     "pm2_5_level": pollution.get("components", {}).get("pm2_5"),
                     "pm10_level": pollution.get("components", {}).get("pm10"),
-                    "processed_timestamp": datetime.now()
+                    "processed_timestamp": batch_timestamp
                 }
                 clean_rows.append(row)
             except Exception as e:
