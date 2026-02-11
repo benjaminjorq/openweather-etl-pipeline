@@ -105,8 +105,8 @@ Antes de comenzar, asegúrate de tener instalado:
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/benjaminjorq/openweather-etl.git](https://github.com/benjaminjorq/openweather-etl.git)
-    cd openweather-etl
+    git clone [https://github.com/benjaminjorq/openweather-etl-pipeline.git](https://github.com/benjaminjorq/openweather-etl-pipeline.git)
+    cd openweather-etl-pipeline
     ```
 
 2.  **Configurar variables de entorno:**
