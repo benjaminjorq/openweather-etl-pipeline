@@ -20,6 +20,8 @@ GOLD_FOLDER.mkdir(parents=True, exist_ok=True)
 RANKING_DIR.mkdir(parents=True, exist_ok=True)
 SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
 
+# 3. Configuración de Logs
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s", # Formato limpio para ver bien las tablas
@@ -29,7 +31,7 @@ logging.basicConfig(
     ]
 )
 
-# 3. Función: Etiquetar Calidad del Aire
+# 4. Función: Etiquetar Calidad del Aire
 
 def label_pm25_level(pm25):
     if pd.isna(pm25): 
@@ -43,7 +45,7 @@ def label_pm25_level(pm25):
     else: 
         return "Peligroso"
 
-# 4. Función: Etiquetar Temperatura
+# 5. Función: Etiquetar Temperatura
 
 def label_temperature(temp):
     if pd.isna(temp):
@@ -57,7 +59,7 @@ def label_temperature(temp):
     else: 
         return "Caluroso"
     
-# 5. Función: Etiquetar niveles de CO
+# 6. Función: Etiquetar niveles de CO
     
 def label_co_level(co):
     if pd.isna(co): 
@@ -71,7 +73,7 @@ def label_co_level(co):
     else: 
         return "Peligrosa"
     
-# 6. Función: Etiquetar niveles de NO2
+# 7. Función: Etiquetar niveles de NO2
 
 def label_no2_level(no2):
     if pd.isna(no2): 
@@ -85,7 +87,7 @@ def label_no2_level(no2):
     else: 
         return "Peligrosa"
     
-# 7. Función: Etiquetar niveles de O3
+# 8. Función: Etiquetar niveles de O3
 
 def label_o3_level(o3):
     if pd.isna(o3): 
@@ -98,8 +100,32 @@ def label_o3_level(o3):
         return "Dañino"
     else: 
         return "Peligroso"
+    
+# 9. Función Etiquetar niveles de PM 10
 
-# 8. Proceso Principal
+def label_pm10_level(pm10):
+    if pd.isna(pm10):
+        return "Desconocido"
+    if pm10 < 54:
+        return "Bueno"
+    elif pm10 <= 154: 
+        return "Moderado"
+    else:
+        return "Malo"
+    
+# 10. Función Etiquetar niveles de Humedad
+
+def label_humidity(hum):
+    if pd.isna(hum): 
+        return "Desc."
+    if hum < 30: 
+        return "Seco"
+    elif hum < 70: 
+        return "Ideal"
+    else:
+        return "Humedo"
+
+# 11. Proceso Principal
 
 def create_gold_reports():
 
@@ -127,45 +153,82 @@ def create_gold_reports():
     df["co_label"] = df["co_level"].apply(label_co_level)
     df["no2_label"] = df["no2_level"].apply(label_no2_level)
     df["o3_label"] = df["o3_level"].apply(label_o3_level)
+
+    # C. Particiones por Fecha
+
     date_suffix = now.strftime("%Y_%m_%d")
 
-    # Reporte 1: Ranking
+    # REPORTE 1 : Ranking
 
     top5_df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False).head(7)
 
-    ranking_cols = [
-        "city", "country", 
-        "aqi",
-        "pm2_5_level", "pm25_label", 
-        "co_level", "co_label",
-        "no2_level", "no2_label",
-        "o3_level", "o3_label",
-        "temperature_c", "weather_label"
-    ]
-    
-    # Guardar CSV
+    # A. Definir columnas a guardar (Nombre y Etiqueta)
+
+    ranking_cols = ["city", "country", "aqi", "pm2_5_level", "pm25_label", "co_level",
+                    "co_label", "no2_level", "no2_label", "o3_level", "o3_label", "temperature_c", "weather_label"]
+
+    # B. Definir vista para Logs 
+
+    ranking_views = {
+        "city": "Ciudad", "country": "Pais", "aqi": "AQI",
+        "pm2_5_level": "PM2.5", "pm25_label": "Est. PM2.5", 
+        "co_level": "CO", "co_label": "Est. CO",
+        "no2_level": "NO2", "no2_label": "Est. NO2",
+        "o3_level": "O3", "o3_label": "Est. O3",
+        "temperature_c": "Temp", "weather_label": "Clima"
+    }
+
+    # C. Guardar CSV
 
     ranking_path = RANKING_DIR / f"ranking_pollution_{date_suffix}.csv"
     top5_df[ranking_cols].to_csv(ranking_path, index=False)
     
-    # Mostrar tablas en logs
+    # D. Imprimir en Logs
 
-    logging.info(f"\nRanking Top 5 Contaminación\n{top5_df[ranking_cols].to_string(index=False)}")
-    logging.info(f"Guardado en: {ranking_path.name}")
+    logging.info("Ranking Top 7 Contaminación")
+    ranking_df = top5_df[list(ranking_views.keys())].rename(columns=ranking_views)
+    logging.info("\n" + ranking_df.to_string(index=False, justify='left'))
+    logging.info(f"\nGuardado en: {ranking_path.name}")
 
-    # Reporte 2: Resumen por pais
-
-    summary_df = df.groupby("country")[["temperature_c", "pm2_5_level", "pm10_level","humidity_pct", "co_level", "no2_level", "o3_level"]].mean().reset_index().round(2)
+    # REPORTE 2 : Resumen Promedio por Pais
     
-    # Guardar CSV
+    # A. Calcular Promedios Numéricos
+
+    num_cols = ["temperature_c", "pm2_5_level", "pm10_level","humidity_pct", "co_level", "no2_level"]
+    summary_df = df.groupby("country")[num_cols].mean().reset_index().round(1)
+
+    # B. Aplicación de etiquetas para promedios
+
+    summary_df["weather_label"] = summary_df["temperature_c"].apply(label_temperature)
+    summary_df["hum_label"] = summary_df["humidity_pct"].apply(label_humidity)
+    summary_df["pm25_label"] = summary_df["pm2_5_level"].apply(label_pm25_level)
+    summary_df["pm10_label"] = summary_df["pm10_level"].apply(label_pm10_level)
+    summary_df["co_label"] = summary_df["co_level"].apply(label_co_level)
+    summary_df["no2_label"] = summary_df["no2_level"].apply(label_no2_level)
+
+    # C. Definir vista para Logs
+
+    summary_views = {
+        "country": "Pais",
+        "temperature_c": "Temp", "weather_label": "Clima",
+        "humidity_pct": "Hum %", "hum_label": "Est. Hum",
+        "pm2_5_level": "PM2.5", "pm25_label": "Est. PM2.5",
+        "pm10_level": "PM10", "pm10_label": "Est. PM10",
+        "co_level": "CO", "co_label": "Est. CO",
+        "no2_level": "NO2", "no2_label": "Est. NO2"
+    }
+    
+    # D. Guardar CSV
 
     summary_path = SUMMARY_DIR / f"summary_country_{date_suffix}.csv"
-    summary_df.to_csv(summary_path)
+    summary_df.to_csv(summary_path, index=False)
     
-    # Mostrar tabla en Logs
+    # E. Imprimir en Logs
 
-    logging.info(f"\nResumen por País (Vista Previa)\n{summary_df.head(5).to_string()}")
-    logging.info(f"Guardado en: {summary_path.name}")
+    logging.info(" Resumen Promedio por Pais (Vista Previa): ")
+    view_summary = summary_df[list(summary_views.keys())].rename(columns=summary_views)
+    logging.info("\n" + view_summary.to_string(index=False, justify='left'))
+    logging.info(f"\nGuardado en: {summary_path.name}")
 
 if __name__ == "__main__":
     create_gold_reports()
