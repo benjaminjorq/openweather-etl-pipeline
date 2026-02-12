@@ -38,6 +38,24 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 
 ---
 
+## 💡 Decisiones de Diseño & FAQ
+
+*Justificación de las elecciones técnicas para este proyecto:*
+
+**1. ¿Por qué se optó por una arquitectura Medallion (Bronze/Silver/Gold)?**
+Se eligió la arquitectura Medallion para estructurar el pipeline en capas con responsabilidades claramente definidas: almacenamiento de datos sin procesar (Bronze), limpieza y validación de calidad (Silver), y transformaciones orientadas a negocio (Gold), con el objetivo de que los reportes finales consuman siempre datos confiables y coherentes.
+
+**2. ¿Por qué utilizar CSV en la capa Silver en lugar de Parquet?**
+Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet seria preferible por compresión y mejor performance de lectura (sistemas distribuidos).
+
+**3. ¿Cómo se garantiza la Idempotencia del pipeline?**
+El pipeline controla duplicados en la capa Silver mediante `drop_duplicates`, sin embargo para reforzar la idempotencia se aplicó una restricción en la base de datos mediante una `PRIMARY KEY` compuesta (city, processed_timestamp) en PostgreSQL, evitando la inserción de registros duplicados ante re-ejecuciones del pipeline.
+
+**4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
+Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
+
+---
+
 ## 🛠️ Tech Stack & Librerías
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
@@ -105,7 +123,7 @@ Antes de comenzar, asegúrate de tener instalado:
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/benjaminjorq/openweather-etl-pipeline.git](https://github.com/benjaminjorq/openweather-etl-pipeline.git)
+    git clone https://github.com/benjaminjorq/openweather-etl-pipeline.git
     cd openweather-etl-pipeline
     ```
 
@@ -115,7 +133,7 @@ Antes de comenzar, asegúrate de tener instalado:
     AIRFLOW_UID=50000
     OPENWEATHER_API_KEY=tu_api_key_aqui
     POSTGRES_USER=airflow
-    POSTGRES_PASSWORD=airflow
+    POSTGRES_PASSWORD=tu_password
     POSTGRES_DB=weather_db
     ```
 
