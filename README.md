@@ -1,4 +1,4 @@
-# 🌤️ OpenWeather ETL Pipeline
+# OpenWeather ETL Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -16,7 +16,7 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
 </div>
 
-## 🏗️ Arquitectura de Datos
+## Arquitectura de Datos
 
 El flujo está diseñado para transformar datos crudos en insights de negocio:
 
@@ -38,7 +38,7 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 
 ---
 
-## 💡 Decisiones de Diseño & FAQ
+## Decisiones de Diseño & FAQ
 
 *Justificación de las elecciones técnicas para este proyecto:*
 
@@ -71,7 +71,7 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 ---
 
-## ⚙️ Orquestación
+## Orquestación
 
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
@@ -83,7 +83,7 @@ La automatización y el control del flujo de datos se gestionan con Apache Airfl
 
 ---
 
-### 📑 Monitoreo y Logs
+### Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
 
@@ -117,13 +117,13 @@ Evidencia de la lógica de negocio aplicada: creación de rankings de contaminac
 
 ---
 
-## 🚀 Requerimientos
+## Requerimientos
 
 Antes de comenzar, asegúrate de tener instalado:
 * [Docker Desktop](https://www.docker.com/products/docker-desktop)
 * Una API Key activa de [OpenWeatherMap](https://openweathermap.org/api)
 
-## 🔧 Configuración e Instalación
+## Configuración e Instalación
 
 1.  **Clonar el repositorio:**
     ```bash
