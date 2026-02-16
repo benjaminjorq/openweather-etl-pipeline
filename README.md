@@ -1,4 +1,4 @@
-# OpenWeather ETL Pipeline
+# ☀️ OpenWeather ETL Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -15,6 +15,19 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
 </div>
+
+--
+
+## El Problema (Business Case)
+
+En regiones como Sudamérica, la calidad del aire y los cambios meteorológicos tienen un impacto directo en la salud pública y la toma de decisiones (alertas ambientales, restricciones vehiculares). Sin embargo, los datos crudos sobre el clima y la contaminación (PM2.5, PM10, CO, NO2) suelen estar dispersos, en formatos semi-estructurados (JSON APIs) y carecen de un historial consolidado.
+
+**El objetivo de este pipeline es:**
+1. **Automatizar** la ingesta de datos meteorológicos y de calidad del aire para 25 ciudades representativas (15 ciudades de las macrozonas de Chile y 10 capitales principales de Sudamérica como punto de comparación regional).
+2. **Estandarizar y limpiar** la información en un repositorio centralizado.
+3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
+
+--
 
 ## Arquitectura de Datos
 
@@ -60,7 +73,7 @@ Se eligió Airflow porque permite tener mayor control sobre el flujo completo de
 
 ---
 
-## 🛠️ Tech Stack & Librerías
+## Tech Stack & Librerías
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
 
