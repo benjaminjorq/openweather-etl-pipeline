@@ -16,7 +16,7 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
 </div>
 
---
+---
 
 ## El Problema (Business Case)
 
@@ -27,7 +27,7 @@ En regiones como Sudamérica, la calidad del aire y los cambios meteorológicos 
 2. **Estandarizar y limpiar** la información en un repositorio centralizado.
 3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
 
---
+---
 
 ## Arquitectura de Datos
 
