@@ -18,12 +18,15 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ---
 
-## El Problema (Business Case)
+## Contexto y Alcance del Proyecto (Business Case & Scope)
 
-En regiones como Sudamérica, la calidad del aire y los cambios meteorológicos tienen un impacto directo en la salud pública y la toma de decisiones (alertas ambientales, restricciones vehiculares). Sin embargo, los datos crudos sobre el clima y la contaminación (PM2.5, PM10, CO, NO2) suelen estar dispersos, en formatos semi-estructurados (JSON APIs) y carecen de un historial consolidado.
+Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
+
+Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
 
 **El objetivo de este pipeline es:**
-1. **Automatizar** la ingesta de datos meteorológicos y de calidad del aire para 25 ciudades representativas (15 ciudades de las macrozonas de Chile y 10 capitales principales de Sudamérica como punto de comparación regional).
+1. **Automatizar** Automatizar la extracción diaria para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
+   * *Tech note:* La selección de ciudades se desacopló del código mediante un archivo `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita.
 2. **Estandarizar y limpiar** la información en un repositorio centralizado.
 3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
 
