@@ -122,6 +122,7 @@ collected 3 items
 pytests\test_transform.py ...                                            [100%]
 
 ============================== 3 passed in 1.94s ==============================
+```
 ---
 ### Monitoreo y Logs
 
