@@ -1,9 +1,10 @@
-# 🌤️ OpenWeather ETL Pipeline
+# ☀️ OpenWeather ETL Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![Airflow](https://img.shields.io/badge/Apache%20Airflow-Orchestration-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
 
 ##  Sobre el Proyecto
 
@@ -15,7 +16,20 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
 </div>
 
-## 🏗️ Arquitectura de Datos
+---
+
+## El Problema (Business Case)
+
+En regiones como Sudamérica, la calidad del aire y los cambios meteorológicos tienen un impacto directo en la salud pública y la toma de decisiones (alertas ambientales, restricciones vehiculares). Sin embargo, los datos crudos sobre el clima y la contaminación (PM2.5, PM10, CO, NO2) suelen estar dispersos, en formatos semi-estructurados (JSON APIs) y carecen de un historial consolidado.
+
+**El objetivo de este pipeline es:**
+1. **Automatizar** la ingesta de datos meteorológicos y de calidad del aire para 25 ciudades representativas (15 ciudades de las macrozonas de Chile y 10 capitales principales de Sudamérica como punto de comparación regional).
+2. **Estandarizar y limpiar** la información en un repositorio centralizado.
+3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
+
+---
+
+## Arquitectura de Datos
 
 El flujo está diseñado para transformar datos crudos en insights de negocio:
 
@@ -37,7 +51,29 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 
 ---
 
-## 🛠️ Tech Stack & Librerías
+## Decisiones de Diseño & FAQ
+
+*Justificación de las elecciones técnicas para este proyecto:*
+
+**1. ¿Por qué se optó por una arquitectura Medallion (Bronze/Silver/Gold)?**
+
+Se eligió la arquitectura Medallion para estructurar el pipeline en capas con responsabilidades claramente definidas: almacenamiento de datos sin procesar (Bronze), limpieza y validación de calidad (Silver), y transformaciones orientadas a negocio (Gold), con el objetivo de que los reportes finales consuman siempre datos confiables y coherentes.
+
+**2. ¿Por qué utilizar CSV en la capa Silver en lugar de Parquet?**
+
+Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet seria preferible por compresión y mejor performance de lectura (sistemas distribuidos).
+
+**3. ¿Cómo se garantiza la Idempotencia del pipeline?**
+
+El pipeline controla duplicados en la capa Silver mediante `drop_duplicates`, sin embargo para reforzar la idempotencia se aplicó una restricción en la base de datos mediante una `PRIMARY KEY` compuesta (city, processed_timestamp) en PostgreSQL, evitando la inserción de registros duplicados ante re-ejecuciones del pipeline.
+
+**4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
+
+Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load >> Report`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
+
+---
+
+## Tech Stack & Librerías
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
 
@@ -48,7 +84,7 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 ---
 
-## ⚙️ Orquestación
+## Orquestación
 
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
@@ -60,7 +96,7 @@ La automatización y el control del flujo de datos se gestionan con Apache Airfl
 
 ---
 
-### 📑 Monitoreo y Logs
+### Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
 
@@ -89,9 +125,40 @@ Confirmación de la ingesta de datos limpios hacia la base de datos relacional P
 <summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
 Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
 <br><br>
-<img width="1085" alt="log gold" src="https://github.com/user-attachments/assets/7828776f-e364-41ff-834e-83a0853c4d40" />
+<img width="944" height="455" alt="log gold" src="https://github.com/user-attachments/assets/414faf12-8739-4e77-8ff7-64a3e04ae2f9" />
 </details>
 
+---
+
+## Requerimientos
+
+Antes de comenzar, asegúrate de tener instalado:
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* Una API Key activa de [OpenWeatherMap](https://openweathermap.org/api)
+
+## Configuración e Instalación
+
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone https://github.com/benjaminjorq/openweather-etl-pipeline.git
+    cd openweather-etl-pipeline
+    ```
+
+2.  **Configurar variables de entorno:**
+    Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales (puedes usar el archivo `.env.example` como guía):
+    ```env
+    AIRFLOW_UID=50000
+    OPENWEATHER_API_KEY=tu_api_key_aqui
+    POSTGRES_USER=airflow
+    POSTGRES_PASSWORD=tu_password
+    POSTGRES_DB=weather_db
+    ```
+
+3.  **Iniciar los servicios:**
+    Ejecuta el siguiente comando para levantar Airflow y PostgreSQL:
+    ```bash
+    docker-compose up -d
+    ```
 ---
 
 ## 📂 Estructura del Repositorio
