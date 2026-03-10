@@ -114,7 +114,6 @@ python -m pytest pytests/test_transform.py
 <img width="1465" height="62" alt="image" src="https://github.com/user-attachments/assets/81424a4c-c831-4c15-9ca0-5c1f96f9d8dd" />
 
 ---
-
 ### Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
