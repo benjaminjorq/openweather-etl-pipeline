@@ -111,9 +111,17 @@ Para correr las pruebas localmente y verificar la lógica de transformación, ej
 ```bash
 python -m pytest pytests/test_transform.py
 ```
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\Benjamin\airwatch
+configfile: pytest.ini
+plugins: anyio-4.12.0
+collected 3 items
 
-<img width="1465" height="62" alt="image" src="https://github.com/user-attachments/assets/81424a4c-c831-4c15-9ca0-5c1f96f9d8dd" />
+pytests\test_transform.py ...                                            [100%]
 
+============================== 3 passed in 1.94s ==============================
 ---
 ### Monitoreo y Logs
 
