@@ -14,6 +14,8 @@ SILVER_FOLDER = BASE_DIR / "data/silver"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 SILVER_FOLDER.mkdir(parents=True, exist_ok=True)
 
+# 2. Configuración de Logs
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -23,7 +25,7 @@ logging.basicConfig(
     ]
 )
 
-# 2. Función para obtener archivo fuente
+# 3. Función para obtener archivo fuente
 
 def get_latest_bronze_file():
     """Retorna la ruta del archivo JSON más reciente en Bronze."""
@@ -32,12 +34,17 @@ def get_latest_bronze_file():
         raise FileNotFoundError("Directorio Bronze vacío.")
     return max(files, key=lambda f: f.stat().st_mtime)  #Lee el último registro desde Bronze
 
-# 3. Función de Lógica de Negocio y Limpieza
+# 4. Función de Lógica de Negocio y Limpieza
 
 def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
     """Aplica casting de tipos, limpieza de strings y filtros de calidad."""
 
+    logging.info(f"DataFrame antes de Transformar: {df.head}")
+    logging.info(f"Total de Filas antes de Transformar: {len(df)}")
+    logging.info(f"Tipos de Datos antes de Transformar: {df.dtypes}")
+
     # Casting de numéricos
+
     df["temperature_c"] = pd.to_numeric(df["temperature_c"], errors="coerce")
     df["humidity_pct"] = pd.to_numeric(df["humidity_pct"], errors="coerce")
     df["wind_speed_ms"] = pd.to_numeric(df["wind_speed_ms"], errors="coerce")
@@ -54,16 +61,23 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
     
     # Filtros de Calidad y Validación
 
+    initial_rows = len(df)
     df = df.drop_duplicates(subset=["city", "processed_timestamp"])
+    logging.info(f"Se eliminaron : {initial_rows - len(df)} filas duplicadas")
+
+    rows_before_dropna = len(df)
     df = df.dropna(subset=["city", "temperature_c"])
+    logging.info(f"Se eliminaron : {rows_before_dropna - len(df)} valores faltantes")
     
-    # Filtro de Rango 
+    # Filtro de Rango
 
     df = df[(df["temperature_c"] > -90) & (df["temperature_c"] < 60)]
+
+    
     
     return df
 
-# 4. Proceso Principal de Transformación
+# 5. Proceso Principal de Transformación
 
 def start_transformation_process():
     logging.info("Iniciando Proceso de Transformación")
@@ -77,7 +91,7 @@ def start_transformation_process():
 
         clean_rows = []
         
-        # 5. Aplanamiento de datos (Flattening)
+        # 6. Aplanamiento de datos (Flattening)
 
         batch_timestamp = datetime.now().replace(second=0, microsecond=0)    # Hace que todos los datos tengan la misma hora en el output
 
@@ -111,7 +125,7 @@ def start_transformation_process():
             except Exception as e:
                 logging.warning(f"Error procesando registro individual: {e}")
 
-        # 6. Creación y Persistencia del DataFrame
+        # 7. Creación y Persistencia del DataFrame
 
         if clean_rows:
             df = pd.DataFrame(clean_rows)

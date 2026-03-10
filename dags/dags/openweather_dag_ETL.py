@@ -17,13 +17,13 @@ default_args = {
 # 2. DAG
 
 with DAG(
-    dag_id='openweather_pipeline_simple',
+    dag_id='openweather_pipeline_ETL',
     default_args=default_args,
     description='ETL Clima Chile: Arquitectura Medallion con carga a PostgreSQL',
     schedule_interval='0 * * * *', # Se ejecuta una vez por hora (minuto 0)
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"), # Hora local de Chile
     catchup=False,
-    tags=['OpenWeather Medallion Pipeline'],
+    tags=['OpenWeather Extract-Transform-Load'],
 ) as dag:
 
 # 3. Definición de Tareas (Capa Bronze, Silver y Gold)
@@ -49,12 +49,6 @@ with DAG(
         bash_command='python /opt/airflow/pipeline/load/openweather_load_database.py'
     )
 
-    # Reporte: Genera el ranking de contaminación 
-    t4_report = BashOperator(
-        task_id='4_generar_reporte_gold',
-        bash_command='python /opt/airflow/pipeline/reports_to_gold/openweather_gold_report.py'
-    )
-
     # 4. Configuración de Dependencias
     
-    t1_ingest >> t2_transform >> t3_load >> t4_report
+    t1_ingest >> t2_transform >> t3_load 

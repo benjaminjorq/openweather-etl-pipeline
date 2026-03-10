@@ -131,36 +131,48 @@ def create_gold_reports():
 
     logging.info("Inicio de generación de reportes")
     
-    # A. Buscar archivo Silver
+    # A. Buscar archivos de la capa Silver
 
     now = datetime.now()
-    path = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
+    daily_silver_path = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
     
-    if not path.exists():
-        logging.warning("No hay carpeta Silver de hoy")
+    if not daily_silver_path.exists():
+        logging.warning("No se encontró la carpeta Silver de hoy.")
         return
 
-    files = list(path.glob("clean_weather_data_*.csv"))
-    if not files: return
+    daily_files = list(daily_silver_path.glob("clean_weather_data_*.csv")) 
+    if not daily_files: 
+        logging.warning("No se generaron archivos CSV hoy.")
+        return
     
-    latest_file = max(files, key=lambda f: f.stat().st_mtime)
-    df = pd.read_csv(latest_file)
+    # B. Consolidar y promediar los datos diarios
 
-    # B. Enriquecimiento
+    dataframes_list = [pd.read_csv(file) for file in daily_files]
+    raw_df = pd.concat(dataframes_list, ignore_index=True)
+
+    logging.info(f"Consolidación exitosa. Total de registros: {len(raw_df)}")
+
+    all_numeric_cols = ["temperature_c", "aqi", "pm2_5_level", "pm10_level", "co_level", "no2_level", "o3_level", "humidity_pct"]
+    df = raw_df.groupby(["city", "country"])[all_numeric_cols].mean().reset_index().round(1)
+
+    logging.info(f"Registros únicos tras calcular el promedio diario: {len(df)}")
+
+    # C. Enriquecimiento de Datos (Aplicación de etiquetas)
 
     df["weather_label"] = df["temperature_c"].apply(label_temperature)
     df["pm25_label"] = df["pm2_5_level"].apply(label_pm25_level)
     df["co_label"] = df["co_level"].apply(label_co_level)
     df["no2_label"] = df["no2_level"].apply(label_no2_level)
     df["o3_label"] = df["o3_level"].apply(label_o3_level)
+    df["hum_label"] = df["humidity_pct"].apply(label_humidity)
 
-    # C. Particiones por Fecha
+    # C. Particiones por fecha para los archivos de salida
 
     date_suffix = now.strftime("%Y_%m_%d")
 
     # REPORTE 1 : Ranking
 
-    top5_df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False).head(7)
+    top7_df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False).head(7)
 
     # A. Definir columnas a guardar (Nombre y Etiqueta)
 
@@ -181,12 +193,12 @@ def create_gold_reports():
     # C. Guardar CSV
 
     ranking_path = RANKING_DIR / f"ranking_pollution_{date_suffix}.csv"
-    top5_df[ranking_cols].to_csv(ranking_path, index=False)
+    top7_df[ranking_cols].to_csv(ranking_path, index=False)
     
     # D. Imprimir en Logs
 
     logging.info("Ranking Top 7 Contaminación")
-    ranking_df = top5_df[list(ranking_views.keys())].rename(columns=ranking_views)
+    ranking_df = top7_df[list(ranking_views.keys())].rename(columns=ranking_views)
     logging.info("\n" + ranking_df.to_string(index=False, justify='left'))
     logging.info(f"\nGuardado en: {ranking_path.name}")
 
@@ -229,6 +241,8 @@ def create_gold_reports():
     view_summary = summary_df[list(summary_views.keys())].rename(columns=summary_views)
     logging.info("\n" + view_summary.to_string(index=False, justify='left'))
     logging.info(f"\nGuardado en: {summary_path.name}")
+
+# 12. Ejecución del Script
 
 if __name__ == "__main__":
     create_gold_reports()

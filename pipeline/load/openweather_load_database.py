@@ -15,6 +15,8 @@ LOG_DIR = BASE_DIR / "logs"
 SILVER_FOLDER = BASE_DIR / "data/silver"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
+# 2. Configuración de Logs
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -24,7 +26,7 @@ logging.basicConfig(
     ]
 )
 
-# 2. Configuración de conexión DB
+# 3. Configuración de conexión DB
 
 def get_db_engine():
     """Crea la conexión SQLAlchemy usando variables de entorno."""
@@ -43,12 +45,12 @@ def get_db_engine():
         logging.critical(f"Error configurando motor de base de datos: {e}")
         exit()
 
-# 3. Proceso Principal de Carga
+# 4. Proceso Principal de Carga
 
 def start_database_load():
     logging.info("Iniciando carga en Base de Datos PostgreSQL")
     
-    # 4. Localizar partición del día actual
+    # 5. Localizar partición del día actual
 
     now = datetime.now()
     todays_path = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
@@ -66,11 +68,11 @@ def start_database_load():
         latest_csv = max(files, key=lambda f: f.stat().st_mtime)
         logging.info(f"Cargando archivo: {latest_csv.name}")
 
-        # 5. Lectura del csv
+        # 6. Lectura del csv
 
         df = pd.read_csv(latest_csv)
         
-        # 6. Inserción en Base de Datos
+        # 7. Inserción en Base de Datos
 
         engine = get_db_engine()
         
