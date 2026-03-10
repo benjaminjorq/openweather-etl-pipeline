@@ -96,6 +96,25 @@ La automatización y el control del flujo de datos se gestionan con Apache Airfl
 
 ---
 
+## Pruebas Unitarias (Testing)
+
+En este proyecto se implementó un conjunto de pruebas automatizadas utilizando **Pytest** para estudiar y garantizar la integridad, consistencia y calidad de los datos antes de su inserción en PostgreSQL. Para lograrlo, se diseñó un entorno que inyecta un *dataset* simulado con errores comunes (espacios extra, valores nulos, inconsistencia de mayúsculas y tipos de datos mixtos) directamente en la función de transformación de la capa Silver (`clean_and_normalize`). Esto asegura que los datos cumplan con los formatos requeridos.
+
+### Casos de Prueba Cubiertos
+* **Limpieza de Cadenas (`test_string_cleaning`):** Verifica la eliminación de espacios en blanco (`strip`), la corrección de capitalización en descripciones y el manejo seguro de valores nulos.
+* **Conversión Numérica (`test_numeric_casting`):** Valida que las métricas extraídas de la API (temperatura, humedad, velocidad del viento) se conviertan correctamente a tipos numéricos manipulables.
+* **Manejo de Fechas (`test_date_conversion`):** Asegura que la columna de tiempo se formatee estrictamente al estándar temporal de Pandas (`datetime64[ns]`).
+
+### Ejecución de las Pruebas
+Para correr las pruebas localmente y verificar la lógica de transformación, ejecuta el siguiente comando desde la raíz del proyecto:
+
+```bash
+python -m pytest pytests/test_transform.py
+
+<img width="1465" height="62" alt="image" src="https://github.com/user-attachments/assets/81424a4c-c831-4c15-9ca0-5c1f96f9d8dd" />
+
+---
+
 ### Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
