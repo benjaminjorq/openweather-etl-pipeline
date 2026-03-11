@@ -91,10 +91,22 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
+### 1. Pipeline ETL Principal (Ejecución Horaria)
+Este flujo se encarga de la extracción, transformación y a la base de datos PostgreSQL.
+
 <p align="center">
-  <img width="965" alt="graph airflow" src="https://github.com/user-attachments/assets/28a59102-26b0-451a-a09c-b1a7b39b27f8" />
+  <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
   <br>
-  <em>Vista del DAG en Airflow: Ejecución exitosa de todas las etapas del pipeline.</em>
+  <em>Vista del DAG principal: Ejecución exitosa de las etapas Bronze, Silver y Carga a DB.</em>
+</p>
+
+### 2. Generación de Reportes Gold (Ejecución Diaria)
+Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de la capa Silver, calcular los promedios numéricos diarios y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
+
+<p align="center">
+  <img width="400" alt="graph 2" src="[PEGA_AQUI_LA_URL_DE_TU_SEGUNDA_IMAGEN]" />
+  <br>
+  <em>Vista del DAG de reportes: Consolidación diaria y etiquetado de calidad del aire.</em>
 </p>
 
 ---
