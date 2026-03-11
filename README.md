@@ -92,21 +92,21 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
 ### 1. Pipeline ETL Principal (Ejecución Horaria)
-Este flujo se encarga de la extracción, transformación y a la base de datos PostgreSQL.
+Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs.. 13:00 Hrs..)
 
 <p align="center">
   <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
   <br>
-  <em>Vista del DAG principal: Ejecución exitosa de las etapas Bronze, Silver y Carga a DB.</em>
+  <em>Vista del DAG principal: Ejecución exitosa de las etapas de Ingesta, Transformación y Carga.
 </p>
 
 ### 2. Generación de Reportes Gold (Ejecución Diaria)
-Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de la capa Silver, calcular los promedios numéricos diarios y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
+Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de datos recopilados durante el dia, calcular los promedios numéricos y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
 
 <p align="center">
-  <img width="400" alt="graph 2" src="[PEGA_AQUI_LA_URL_DE_TU_SEGUNDA_IMAGEN]" />
+  <img width="650" height="214" alt="graphh2" src="https://github.com/user-attachments/assets/e14cf57a-8cf0-437c-88c2-b2ae77d72b62" />
   <br>
-  <em>Vista del DAG de reportes: Consolidación diaria y etiquetado de calidad del aire.</em>
+  <em>Vista del DAG de reportes: Ejecución exitosa de la etapa de Reporteria.</em>
 </p>
 
 ---
