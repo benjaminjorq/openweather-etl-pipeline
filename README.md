@@ -97,7 +97,7 @@ Este flujo se encarga de la extracción, transformación y carga en base de dato
 <p align="center">
   <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
   <br>
-  <em>Vista del DAG principal: Ejecución exitosa de las etapas de Ingesta, Transformación y Carga.
+  <em>Vista del DAG principal: Ejecución exitosa de las etapas de Ingesta, Transformación y Carga.</em>
 </p>
 
 ### 2. Generación de Reportes Gold (Ejecución Diaria)
