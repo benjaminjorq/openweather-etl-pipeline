@@ -35,7 +35,9 @@ logging.basicConfig(
 
 def load_cities_config():
     """
-    Lee el archivo YAML de configuración.
+    Objetivo: Lee el archivo YAML de configuración para obtener las ciudades.
+    Retorna: Lista de diccionarios con metadatos de las ciudades (name, lat, lon).
+    Solución de Fallos: Si retorna vacío, verifica que 'config/cities.yaml' exista y tenga un formato válido.
     """
     if not CITIES_FILE.exists():
         logging.error(f"Archivo de configuración no encontrado: {CITIES_FILE}")
@@ -51,8 +53,10 @@ def load_cities_config():
 
 def get_weather_data(lat, lon):
     """
-    Servicio de Clima Actual
-    Obtener temperatura, humedad y viento.
+    Objetivo: Extrae métricas climáticas actuales (temperatura, humedad).
+    Solución de Fallos: 
+    - Fallo 401: Validar que OPENWEATHER_API_KEY en .env sea correcta.
+    - Timeout: Revisar la conectividad de red del contenedor Docker.
     """
     try:
         # URL API Weather
@@ -73,8 +77,8 @@ def get_weather_data(lat, lon):
 
 def get_pollution_data(lat, lon):
     """
-    Servicio de Calidad del Aire
-    Obtener PM2.5, PM10 y CO.
+    Objetivo: Extrae métricas de calidad del aire (PM2.5, PM10, CO, NO2, O3).
+    Solución de Fallos: Similar a get_weather_data. Verificar límites de la API si devuelve 429 (Rate Limit).
     """
     try:
         # URL API Air Pollution
@@ -94,7 +98,10 @@ def get_pollution_data(lat, lon):
 # 6. Función: Guardar en Bronze
 
 def save_to_bronze(data_buffer):
-    """Guarda los datos acumulados en un archivo JSON."""
+    """
+    Objetivo: Guarda el buffer acumulado de datos en la capa Bronze local.
+    Solución de Fallos: IOError/PermissionError indica problemas con el volumen montado en Docker.
+    """
     try:
         timestamp_str = datetime.now().strftime('%Y_%m_%d_%H%M%S')
         filename = f"raw_weather_data_{timestamp_str}.json"
@@ -111,6 +118,10 @@ def save_to_bronze(data_buffer):
 
 def start_ingestion_process():
 
+    """
+    Objetivo: Orquesta la ingesta iterando por cada ciudad y uniendo las respuestas de ambas APIs.
+    Solución de Fallos: Si falta la API_KEY, el proceso aborta para no quemar ejecuciones en vano.
+    """
     logging.info("Iniciando proceso de Ingesta")
     if not API_KEY:
         logging.critical("API Key no definida.")

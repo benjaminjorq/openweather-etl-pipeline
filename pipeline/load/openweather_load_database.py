@@ -29,7 +29,11 @@ logging.basicConfig(
 # 3. Configuración de conexión DB
 
 def get_db_engine():
-    """Crea la conexión SQLAlchemy usando variables de entorno."""
+    """
+    Objetivo: Crea la conexión SQLAlchemy usando credenciales seguras.
+    Solución de Fallos: 
+    - Connection refused: Validar contenedor PostgreSQL o credenciales en .env.
+    """
     try:
         USER = os.getenv('DB_USER')
         PASSWORD = os.getenv('DB_PASSWORD')
@@ -48,6 +52,10 @@ def get_db_engine():
 # 4. Proceso Principal de Carga
 
 def start_database_load():
+    """
+    Objetivo: Localiza la última partición Silver
+    y carga el DataFrame hacia PostgreSQL.
+    """
     logging.info("Iniciando carga en Base de Datos PostgreSQL")
     
     # 5. Localizar partición del día actual
@@ -68,7 +76,7 @@ def start_database_load():
         latest_csv = max(files, key=lambda f: f.stat().st_mtime)
         logging.info(f"Cargando archivo: {latest_csv.name}")
 
-        # 6. Lectura del csv
+        # 6. Lectura del CSV
 
         df = pd.read_csv(latest_csv)
         

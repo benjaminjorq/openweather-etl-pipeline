@@ -28,7 +28,10 @@ logging.basicConfig(
 # 3. Función para obtener archivo fuente
 
 def get_latest_bronze_file():
-    """Retorna la ruta del archivo JSON más reciente en Bronze."""
+    """
+    Objetivo: Identifica el JSON más reciente en la capa Bronze para procesarlo.
+    Solución de Fallos: FileNotFoundError indica que la tarea de ingesta no corrió o falló antes.
+    """
     files = list(BRONZE_FOLDER.glob("*.json"))
     if not files:
         raise FileNotFoundError("Directorio Bronze vacío.")
@@ -37,9 +40,11 @@ def get_latest_bronze_file():
 # 4. Función de Lógica de Negocio y Limpieza
 
 def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
-    """Aplica casting de tipos, limpieza de strings y filtros de calidad."""
-
-    logging.info(f"DataFrame antes de Transformar: {df.head}")
+    """
+    Objetivo: Limpia, normaliza y filtra datos inválidos asegurando la calidad de la capa Silver.
+    Retorna: DataFrame con datos limpios listos para la siguiente etapa.
+    """
+    logging.info(f"DataFrame antes de Transformar: {df.head()}")
     logging.info(f"Total de Filas antes de Transformar: {len(df)}")
     logging.info(f"Tipos de Datos antes de Transformar: {df.dtypes}")
 
@@ -80,6 +85,10 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 # 5. Proceso Principal de Transformación
 
 def start_transformation_process():
+    """
+    Objetivo: Orquesta la transformación, aplanamiento del JSON anidado, limpieza y guardado particionado.
+    Solución de Fallos: Si ocurren excepciones aquí, verificar cambios en la estructura de la API.
+    """
     logging.info("Iniciando Proceso de Transformación")
     
     try:

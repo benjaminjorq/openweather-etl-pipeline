@@ -31,104 +31,33 @@ logging.basicConfig(
     ]
 )
 
-# 4. Función: Etiquetar Calidad del Aire
+# 4. Función: Indicador de Negocio
 
-def label_pm25_level(pm25):
-    if pd.isna(pm25): 
+def get_overall_status(aqi_mean):
+    """
+    Objetivo: Define el estado general del aire basándose en el promedio del índice AQI.
+    El índice original de OpenWeather va de 1 (Excelente) a 5 (Peligroso).
+    Como estamos usando promedios, usamos rangos decimales.
+    """
+    if pd.isna(aqi_mean): 
         return "Desconocido"
-    if pm25 < 12: 
+    if aqi_mean <= 1.5: 
+        return "Excelente"
+    elif aqi_mean <= 2.5: 
         return "Bueno"
-    elif pm25 <= 35:
+    elif aqi_mean <= 3.5:
         return "Moderado"
-    elif pm25 <= 55:
-        return "Dañino"
-    else: 
-        return "Peligroso"
-
-# 5. Función: Etiquetar Temperatura
-
-def label_temperature(temp):
-    if pd.isna(temp):
-        return "Desconocido"
-    if temp < 10: 
-        return "Frío"
-    elif temp < 20: 
-        return "Fresco"
-    elif temp < 30:
-        return "Agradable"
-    else: 
-        return "Caluroso"
-    
-# 6. Función: Etiquetar niveles de CO
-    
-def label_co_level(co):
-    if pd.isna(co): 
-        return "Desconocido"
-    if co < 4400: 
-        return "Bueno"
-    elif co <= 9400:
-        return "Moderado"
-    elif co <= 12400:
-        return "Dañina"
-    else: 
-        return "Peligrosa"
-    
-# 7. Función: Etiquetar niveles de NO2
-
-def label_no2_level(no2):
-    if pd.isna(no2): 
-        return "Desconocido"
-    if no2 < 40: 
-        return "Bueno"
-    elif no2 <= 90:
-        return "Moderado"
-    elif no2 <= 120:
-        return "Dañina"
-    else: 
-        return "Peligrosa"
-    
-# 8. Función: Etiquetar niveles de O3
-
-def label_o3_level(o3):
-    if pd.isna(o3): 
-        return "Desconocido"
-    if o3 < 60: 
-        return "Bueno"
-    elif o3 <= 120:
-        return "Moderado"
-    elif o3 <= 180:
-        return "Dañino"
-    else: 
-        return "Peligroso"
-    
-# 9. Función Etiquetar niveles de PM 10
-
-def label_pm10_level(pm10):
-    if pd.isna(pm10):
-        return "Desconocido"
-    if pm10 < 54:
-        return "Bueno"
-    elif pm10 <= 154: 
-        return "Moderado"
-    else:
+    elif aqi_mean <= 4.5: 
         return "Malo"
-    
-# 10. Función Etiquetar niveles de Humedad
+    else: return "Peligroso"
 
-def label_humidity(hum):
-    if pd.isna(hum): 
-        return "Desc."
-    if hum < 30: 
-        return "Seco"
-    elif hum < 70: 
-        return "Ideal"
-    else:
-        return "Humedo"
-
-# 11. Proceso Principal
+# 5. Proceso Principal
 
 def create_gold_reports():
-
+    """
+    Objetivo: Consolida la data Silver diaria en tablas numéricas optimizadas para BI,
+    incluyendo variables meteorológicas clave (viento y presión) que explican el estado del Aire.
+    """
     logging.info("Inicio de generación de reportes")
     
     # A. Buscar archivos de la capa Silver
@@ -152,19 +81,24 @@ def create_gold_reports():
 
     logging.info(f"Consolidación exitosa. Total de registros: {len(raw_df)}")
 
-    all_numeric_cols = ["temperature_c", "aqi", "pm2_5_level", "pm10_level", "co_level", "no2_level", "o3_level", "humidity_pct"]
-    df = raw_df.groupby(["city", "country"])[all_numeric_cols].mean().reset_index().round(1)
+    numeric_cols = [
+        "temperature_c", "humidity_pct", "wind_speed_ms", "pressure_hpa", 
+        "aqi", "pm2_5_level", "pm10_level", "co_level", "no2_level", "o3_level"
+    ]
+    
+    # Agrupamos calculando el promedio
+
+    df = raw_df.groupby(["city", "country"])[numeric_cols].mean().reset_index().round(1)
 
     logging.info(f"Registros únicos tras calcular el promedio diario: {len(df)}")
 
-    # C. Enriquecimiento de Datos (Aplicación de etiquetas)
+    # C. Enriquecimiento para BI (aqi: air quality index)
 
-    df["weather_label"] = df["temperature_c"].apply(label_temperature)
-    df["pm25_label"] = df["pm2_5_level"].apply(label_pm25_level)
-    df["co_label"] = df["co_level"].apply(label_co_level)
-    df["no2_label"] = df["no2_level"].apply(label_no2_level)
-    df["o3_label"] = df["o3_level"].apply(label_o3_level)
-    df["hum_label"] = df["humidity_pct"].apply(label_humidity)
+    df["overall_status"] = df["aqi"].apply(get_overall_status)
+
+    # Ordenamos de más contaminado a menos contaminado
+
+    df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False)
 
     # C. Particiones por fecha para los archivos de salida
 
@@ -172,24 +106,25 @@ def create_gold_reports():
 
     # REPORTE 1 : Ranking
 
-    top7_df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False).head(7)
+    top7_df = df.head(7)
 
     # A. Definir columnas a guardar (Nombre y Etiqueta)
 
-    ranking_cols = ["city", "country", "aqi", "pm2_5_level", "pm25_label", "co_level",
-                    "co_label", "no2_level", "no2_label", "o3_level", "o3_label", "temperature_c", "weather_label"]
+    ranking_cols = [
+        "city", "country", "temperature_c", "humidity_pct", "wind_speed_ms", "pressure_hpa", 
+        "aqi", "pm2_5_level", "pm10_level", "co_level", "no2_level", "o3_level", "overall_status"
+    ]
 
     # B. Definir vista para Logs 
 
     ranking_views = {
-        "city": "Ciudad", "country": "Pais", "aqi": "AQI",
-        "pm2_5_level": "PM2.5", "pm25_label": "Est. PM2.5", 
-        "co_level": "CO", "co_label": "Est. CO",
-        "no2_level": "NO2", "no2_label": "Est. NO2",
-        "o3_level": "O3", "o3_label": "Est. O3",
-        "temperature_c": "Temp", "weather_label": "Clima"
+        "city": "Ciudad", "country": "Pais",
+        "temperature_c": "Temp", "humidity_pct": "Hum %",
+        "wind_speed_ms": "Viento", "pressure_hpa": "Presion",
+        "aqi": "AQI", "pm2_5_level": "PM2.5", "pm10_level": "PM10", 
+        "co_level": "CO", "no2_level": "NO2", "o3_level": "O3", 
+        "overall_status": "Estado"
     }
-
     # C. Guardar CSV
 
     ranking_path = RANKING_DIR / f"ranking_pollution_{date_suffix}.csv"
@@ -206,28 +141,22 @@ def create_gold_reports():
     
     # A. Calcular Promedios Numéricos
 
-    num_cols = ["temperature_c", "pm2_5_level", "pm10_level","humidity_pct", "co_level", "no2_level"]
-    summary_df = df.groupby("country")[num_cols].mean().reset_index().round(1)
+    summary_df = df.groupby("country")[numeric_cols].mean().reset_index().round(1)
 
-    # B. Aplicación de etiquetas para promedios
+    # B. Aplicación del estado general para promedios por país
 
-    summary_df["weather_label"] = summary_df["temperature_c"].apply(label_temperature)
-    summary_df["hum_label"] = summary_df["humidity_pct"].apply(label_humidity)
-    summary_df["pm25_label"] = summary_df["pm2_5_level"].apply(label_pm25_level)
-    summary_df["pm10_label"] = summary_df["pm10_level"].apply(label_pm10_level)
-    summary_df["co_label"] = summary_df["co_level"].apply(label_co_level)
-    summary_df["no2_label"] = summary_df["no2_level"].apply(label_no2_level)
+    summary_df["overall_status"] = summary_df["aqi"].apply(get_overall_status)
+    summary_df = summary_df.sort_values(by="aqi", ascending=False)
 
     # C. Definir vista para Logs
 
     summary_views = {
         "country": "Pais",
-        "temperature_c": "Temp", "weather_label": "Clima",
-        "humidity_pct": "Hum %", "hum_label": "Est. Hum",
-        "pm2_5_level": "PM2.5", "pm25_label": "Est. PM2.5",
-        "pm10_level": "PM10", "pm10_label": "Est. PM10",
-        "co_level": "CO", "co_label": "Est. CO",
-        "no2_level": "NO2", "no2_label": "Est. NO2"
+        "temperature_c": "Temp", "humidity_pct": "Hum %",
+        "wind_speed_ms": "Viento", "pressure_hpa": "Presion",
+        "aqi": "AQI", "pm2_5_level": "PM2.5", "pm10_level": "PM10", 
+        "co_level": "CO", "no2_level": "NO2", "o3_level": "O3", 
+        "overall_status": "Estado"
     }
     
     # D. Guardar CSV
