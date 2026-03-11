@@ -100,7 +100,7 @@ def get_pollution_data(lat, lon):
 def save_to_bronze(data_buffer):
     """
     Objetivo: Guarda el buffer acumulado de datos en la capa Bronze local.
-    Solución de Fallos: IOError/PermissionError indica problemas con el volumen montado en Docker.
+    Solución de Fallos: Revisar si la carpeta de destino esté bloqueada o no exista; revisar la configuración de carpetas bronze/data.
     """
     try:
         timestamp_str = datetime.now().strftime('%Y_%m_%d_%H%M%S')

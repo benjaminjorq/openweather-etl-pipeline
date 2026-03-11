@@ -56,7 +56,7 @@ def get_overall_status(aqi_mean):
 def create_gold_reports():
     """
     Objetivo: Consolida la data Silver diaria en tablas numéricas optimizadas para BI,
-    incluyendo variables meteorológicas clave (viento y presión) que explican el estado del Aire.
+    incluyendo variables meteorológicas clave (viento, presión..etc) que explican el estado del Aire.
     """
     logging.info("Inicio de generación de reportes")
     
