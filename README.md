@@ -91,10 +91,22 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
+### 1. Pipeline ETL Principal (Ejecución Horaria)
+Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs.. 13:00 Hrs..)
+
 <p align="center">
-  <img width="965" alt="graph airflow" src="https://github.com/user-attachments/assets/28a59102-26b0-451a-a09c-b1a7b39b27f8" />
+  <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
   <br>
-  <em>Vista del DAG en Airflow: Ejecución exitosa de todas las etapas del pipeline.</em>
+  <em>Vista del DAG principal: Ejecución exitosa de las etapas de Ingesta, Transformación y Carga.</em>
+</p>
+
+### 2. Generación de Reportes Gold (Ejecución Diaria)
+Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de datos recopilados durante el dia, calcular los promedios numéricos y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
+
+<p align="center">
+  <img width="650" height="214" alt="graphh2" src="https://github.com/user-attachments/assets/e14cf57a-8cf0-437c-88c2-b2ae77d72b62" />
+  <br>
+  <em>Vista del DAG de reportes: Ejecución exitosa de la etapa de Reporteria.</em>
 </p>
 
 ---
@@ -154,9 +166,10 @@ Confirmación de la ingesta de datos limpios hacia la base de datos relacional P
 
 <details>
 <summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
+  <img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
 Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
 <br><br>
-<img width="944" height="455" alt="log gold" src="https://github.com/user-attachments/assets/414faf12-8739-4e77-8ff7-64a3e04ae2f9" />
+
 </details>
 
 ---
