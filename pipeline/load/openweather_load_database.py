@@ -47,7 +47,7 @@ def get_db_engine():
 
     except Exception as e:
         logging.critical(f"Error configurando motor de base de datos: {e}")
-        exit()
+        raise RuntimeError(f"No se pudo conectar a la base de datos: {e}")
 
 # 4. Proceso Principal de Carga
 
