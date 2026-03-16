@@ -25,5 +25,5 @@ with DAG(
 
     t1_daily_report = BashOperator(
         task_id='generate_daily_gold_report',
-        bash_command='python /opt/airflow/pipeline/reports_to_gold/openweather_gold_report.py'
+        bash_command='python /opt/airflow/src/reports_to_gold/openweather_gold_report.py'
     )

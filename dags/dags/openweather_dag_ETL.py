@@ -32,21 +32,21 @@ with DAG(
 
     t1_ingest = BashOperator(
         task_id='1_ingesta_bronze',
-        bash_command='python /opt/airflow/pipeline/ingestion/openweather_batch_ingest.py'
+        bash_command='python /opt/airflow/src/ingestion/openweather_batch_ingest.py'
     )
 
     # Transformación: Limpia los datos con Pandas
 
     t2_transform = BashOperator(
         task_id='2_transform_silver',
-        bash_command='python /opt/airflow/pipeline/transform/openweather_batch_transform.py'
+        bash_command='python /opt/airflow/src/transform/openweather_batch_transform.py'
     )
 
     # Carga: Inserta los datos limpios en PostgreSQL
 
     t3_load = BashOperator(
         task_id='3_carga_db',
-        bash_command='python /opt/airflow/pipeline/load/openweather_load_database.py'
+        bash_command='python /opt/airflow/src/load/openweather_load_database.py'
     )
 
     # 4. Configuración de Dependencias

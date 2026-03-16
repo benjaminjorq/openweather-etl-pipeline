@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from pipeline.transform.openweather_batch_transform import clean_and_normalize
+from src.transform.openweather_batch_transform import clean_and_normalize
 
 # 1. Creamos un DataFrame sucio para probar la función clean_and_normalize
 
