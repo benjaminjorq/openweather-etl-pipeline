@@ -130,7 +130,7 @@ JOIN dwh.dim_location l ON f.location_id = l.location_id
 GROUP BY l.city, l.country
 ORDER BY temperatura_promedio_c DESC
 LIMIT 5;
-```
+</details> ```
 
 ---
 
