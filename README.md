@@ -83,7 +83,7 @@ Para habilitar consultas analíticas rápidas y eficientes, los datos planos de 
 Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
-<img width="582" height="423" alt="erd" src="https://github.com/user-attachments/assets/7ef004a6-4ebc-4ccf-81f1-5558c72009eb" />
+<img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
   <br>
   <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
   <br>
@@ -117,7 +117,7 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
 
 <details>
-<summary>🔍 Ver SQL: Top 5 Ciudades más calurosas...</summary>
+<summary> Ver SQL: Top 5 Ciudades más calurosas...</summary>
 ```sql
 SELECT
     l.city AS ciudad,
