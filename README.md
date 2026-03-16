@@ -83,7 +83,7 @@ Para habilitar consultas analíticas rápidas y eficientes, los datos planos de 
 Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
-  <img width="1399" height="889" alt="erd" src="https://github.com/user-attachments/assets/68e742fc-50fa-411f-8950-e13234bbeee5" />
+<img width="582" height="423" alt="erd" src="https://github.com/user-attachments/assets/7ef004a6-4ebc-4ccf-81f1-5558c72009eb" />
   <br>
   <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
   <br>
@@ -130,8 +130,6 @@ JOIN dwh.dim_location l ON f.location_id = l.location_id
 GROUP BY l.city, l.country
 ORDER BY temperatura_promedio_c DESC
 LIMIT 5;
-
-<img width="709" height="253" alt="image" src="https://github.com/user-attachments/assets/cceda6f3-ec04-43e8-9d21-c7bc5e82033e" /em>
 
 ---
 
