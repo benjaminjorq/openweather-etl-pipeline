@@ -117,10 +117,9 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
 
 <details>
-<summary><b>🔍 Ver SQL: Top 5 Ciudades más calurosas y su contaminación máxima</b></summary>
-
+<summary>🔍 Ver SQL: Top 5 Ciudades más calurosas...</summary>
 ```sql
-SELECT 
+SELECT
     l.city AS ciudad,
     l.country AS pais,
     ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
@@ -129,7 +128,9 @@ FROM dwh.fact_weather_metrics f
 JOIN dwh.dim_location l ON f.location_id = l.location_id
 GROUP BY l.city, l.country
 ORDER BY temperatura_promedio_c DESC
-LIMIT 5; ```
+LIMIT 5;
+```
+
 </details>
 
 ---
