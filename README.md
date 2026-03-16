@@ -105,13 +105,13 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 
 <div align="center">
   <br>
-  <em>Vista de la tabla de hechos: métricas puras y llaves foráneas listas para cruzar.</em>
+  <em>Vista de la tabla de hechos: métricas y llaves foráneas.</em>
 </div>
 
 <img width="1876" height="417" alt="image" src="https://github.com/user-attachments/assets/82c852c3-df46-4376-b971-b3777bdf013c" />
 
 
-> *Nota: Todo el contexto descriptivo (como el nombre de la ciudad o la descripción del clima) fue extraído hacia las dimensiones, dejando la capa Gold limpia y lista para su consumo analítico.*
+*Nota: Todo el contexto descriptivo (como el nombre de la ciudad o la descripción del clima) fue extraído hacia las dimensiones, dejando la capa Gold limpia y lista para su consumo analítico.*
 
 ### Casos de Uso Analítico (Business Value)
 El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
