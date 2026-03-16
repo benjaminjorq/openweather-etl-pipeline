@@ -87,7 +87,6 @@ Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas,
   <br>
   <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
   <br>
-  <b>👉 <a href="./sql/init_dwh.sql">Haz clic aquí para ver el script SQL (DDL) con la creación de tablas y restricciones de idempotencia</a></b>
 </div>
 
 ### Estructura del Modelo Estrella
@@ -105,7 +104,6 @@ Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas,
 Como resultado del modelado, la tabla central almacena las llaves foráneas que referencian a las tablas de dimensión en lugar de repetir información descriptiva. Esto permite mantener una estructura más eficiente, reducir la redundancia de datos y asegurar la integridad mediante restricciones como `UNIQUE`.
 
 <div align="center">
-  <img width="80%" alt="Fact Table Data" src="https://ruta-a-tu-imagen-fact-table-aqui.png" />
   <br>
   <em>Vista de la tabla de hechos: métricas puras y llaves foráneas listas para cruzar.</em>
 </div>
@@ -133,7 +131,7 @@ GROUP BY l.city, l.country
 ORDER BY temperatura_promedio_c DESC
 LIMIT 5;
 
-<img width="709" height="253" alt="image" src="https://github.com/user-attachments/assets/cceda6f3-ec04-43e8-9d21-c7bc5e82033e" />
+<img width="709" height="253" alt="image" src="https://github.com/user-attachments/assets/cceda6f3-ec04-43e8-9d21-c7bc5e82033e" /em>
 
 ---
 
