@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from pathlib import Path
 from datetime import datetime
 
@@ -83,13 +83,66 @@ def start_database_load():
         # 7. Inserción en Base de Datos
 
         engine = get_db_engine()
-        
+
         with engine.begin() as connection:
-            df.to_sql(name="weather_silver_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
-        logging.info(f"Carga exitosa: {len(df)} registros insertados en PostgreSQL.")
+            df.to_sql(name="weather_silver_table", con=connection, if_exists="replace", index=False, schema="public", method="multi")
+            logging.info(f"Carga Silver exitosa: {len(df)} registros insertados en PostgreSQL.")
+
+            # 8. Proceso ELT: Inserción de datos en Gold (UPSERT)
+
+            logging.info("Iniciando traspaso automático hacia capa Gold (Dimensiones y Hechos)")
+            
+            query = """
+                -- 1. Actualizar Dimensión Location
+                INSERT INTO dwh.dim_location (city, country)
+                SELECT DISTINCT city, country FROM public.weather_silver_table
+                ON CONFLICT (city, country) DO NOTHING;
+
+                -- 2. Actualizar Dimensión Weather Condition
+                INSERT INTO dwh.dim_weather_condition (description)
+                SELECT DISTINCT weather_desc FROM public.weather_silver_table
+                ON CONFLICT (description) DO NOTHING;
+
+                -- 3. Actualizar Dimensión Time
+                INSERT INTO dwh.dim_time (full_date, hour, day, month, year, is_weekend)
+                SELECT DISTINCT 
+                processed_timestamp::TIMESTAMP,
+                EXTRACT(HOUR FROM processed_timestamp::TIMESTAMP),
+                EXTRACT(DAY FROM processed_timestamp::TIMESTAMP),
+                EXTRACT(MONTH FROM processed_timestamp::TIMESTAMP),
+                EXTRACT(YEAR FROM processed_timestamp::TIMESTAMP),
+                CASE WHEN EXTRACT(ISODOW FROM processed_timestamp::TIMESTAMP) IN (6, 7) THEN TRUE ELSE FALSE END
+                FROM public.weather_silver_table
+                ON CONFLICT (full_date) DO NOTHING;
+
+                -- 4. Tabla de Hechos 
+                INSERT INTO dwh.fact_weather_metrics (
+                location_id, time_id, condition_id, aqi_id,
+                feels_like_c, pressure_hpa,
+                temperature_c, humidity_pct, wind_speed_ms, 
+                pm2_5_level, pm10_level, co_level, no2_level, o3_level
+                )
+                SELECT 
+                l.location_id, t.time_id, c.condition_id, s.aqi, 
+                s.feels_like_c, s.pressure_hpa, 
+                s.temperature_c, s.humidity_pct, s.wind_speed_ms,
+                s.pm2_5_level, s.pm10_level, s.co_level, s.no2_level, s.o3_level
+                FROM public.weather_silver_table AS s
+                JOIN dwh.dim_location AS l ON s.city = l.city AND s.country = l.country
+                JOIN dwh.dim_weather_condition AS c ON s.weather_desc = c.description
+                JOIN dwh.dim_time AS t ON s.processed_timestamp::TIMESTAMP = t.full_date
+                ON CONFLICT (location_id, time_id) DO NOTHING;
+                """
+
+            connection.execute(text(query)) # Text para evitar error con SQLAlchemy 2.x
+            logging.info("Traspaso a Capa Gold completado con éxito")
+            logging.info("Data Warehouse está actualizado")
         
     except Exception as e:
         logging.error(f"Error durante el proceso de carga: {e}")
+        raise
+
+# 9. Ejecución de Carga en BD
 
 if __name__ == "__main__":
     start_database_load()
