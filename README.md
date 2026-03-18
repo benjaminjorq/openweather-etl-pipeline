@@ -76,6 +76,65 @@ Se eligió Airflow porque permite tener mayor control sobre el flujo completo de
 
 ---
 
+## 🗄️ Modelado Dimensional (Capa Gold / Data Warehouse)
+
+Para habilitar consultas analíticas rápidas y eficientes, los datos planos de la capa Silver se transforman y cargan (proceso ELT) en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
+
+Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
+
+<div align="center">
+<img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
+  <br>
+  <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
+  <br>
+</div>
+
+### Estructura del Modelo Estrella
+
+* **Dimensiones (Contexto):**
+  * `dim_location`: Entidad geográfica única (`city`, `country`).
+  * `dim_time`: Dimensión de tiempo granular para análisis.
+  * `dim_weather_condition`: Catálogo estandarizado de condiciones climáticas.
+  * `dim_air_quality`: Clasificación del Índice de Calidad del Aire (AQI) y su estado descriptivo (ej. Bueno, Moderado, Peligroso).
+* **Tabla de Hechos (Métricas):**
+  * `fact_weather_metrics`: Tabla central optimizada con `Surrogate Keys` (IDs numéricos incrementales) que almacena las métricas meteorológicas y de calidad del aire (`temperature_c`, `pm2_5_level`, `wind_speed_ms`, etc.).
+
+### Muestra de Datos: La Tabla de Hechos
+
+Como resultado del modelado, la tabla central almacena las llaves foráneas que referencian a las tablas de dimensión en lugar de repetir información descriptiva. Esto permite mantener una estructura más eficiente, reducir la redundancia de datos y asegurar la integridad mediante restricciones como `UNIQUE`.
+
+<div align="center">
+  <br>
+  <em>Vista de la tabla de hechos: métricas y llaves foráneas.</em>
+</div>
+
+<img width="1876" height="417" alt="image" src="https://github.com/user-attachments/assets/82c852c3-df46-4376-b971-b3777bdf013c" />
+
+
+*Nota: Todo el contexto descriptivo (como el nombre de la ciudad o la descripción del clima) fue extraído hacia las dimensiones, dejando la capa Gold limpia y lista para su consumo analítico.*
+
+### Casos de Uso Analítico (Business Value)
+El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
+
+<details>
+<summary> Ver SQL: Top 5 Ciudades más calurosas...</summary>
+```sql
+SELECT
+    l.city AS ciudad,
+    l.country AS pais,
+    ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
+    MAX(f.pm2_5_level) AS pico_maximo_pm25
+FROM dwh.fact_weather_metrics f
+JOIN dwh.dim_location l ON f.location_id = l.location_id
+GROUP BY l.city, l.country
+ORDER BY temperatura_promedio_c DESC
+LIMIT 5;
+```
+
+</details>
+
+---
+
 ## Tech Stack & Librerías
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
@@ -218,7 +277,7 @@ openweather-etl-pipeline/
 │   └── gold/            # Reportes de Negocio
 │       ├── ranking/     # Top contaminación (.csv)
 │       └── summary/     # Promedios por país (.csv)
-├── pipeline/            # Código fuente modular
+├── src/                 # Código fuente modular
 │   ├── ingestion/       # batch_ingest.py
 │   ├── transform/       # batch_transform.py
 │   ├── load/            # load_database.py
