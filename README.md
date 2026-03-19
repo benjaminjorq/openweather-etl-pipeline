@@ -113,10 +113,10 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 
 ### Casos de Uso Analítico (Business Value)
 
-El diseño relacional del Data Warehouse permite responder preguntas críticas de negocio cruzando las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
+El diseño relacional del Data Warehouse permite responder preguntas de negocio uniendo las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
-<summary><b>Consulta 1: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Más contaminadas)</b></summary>
+<summary><b>Consulta 1 SQL: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Más contaminadas)</b></summary>
 
 *Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
 
@@ -129,9 +129,9 @@ SELECT
     MAX(a.estado) AS estado
 FROM dwh.fact_weather_metrics AS f
 JOIN dwh.dim_location AS l 
-    ON f.location_id = l.location_id
+ON f.location_id = l.location_id
 JOIN dwh.dim_air_quality AS a 
-    ON f.aqi_id = a.aqi_id
+ON f.aqi_id = a.aqi_id
 GROUP BY l.city, l.country
 ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
 LIMIT 5;
@@ -141,7 +141,7 @@ LIMIT 5;
 </details>
 
 <details>
-<summary><b>Consulta 2: Top 10 Ciudades con Aire más Limpio en Chile </b></summary>
+<summary><b>Consulta 2 SQL: Top 10 Ciudades con Aire más Limpio en Chile </b></summary>
 
 *Identifica las 10 ciudades de Chile con los niveles más bajos de partículas suspendidas (PM10) y emisiones vehiculares (CO), generando un ranking nacional de limpieza junto a su temperatura promedio.
   
@@ -169,7 +169,7 @@ LIMIT 10;
 </details>
 
 <details>
-<summary><b>Consulta 2: Estado Térmico Actual por Ciudad (Simulación) </b></summary>
+<summary><b>Consulta 3 SQL: Estado Térmico Actual por Ciudad (Simulación) </b></summary>
 
 *Analiza el confort térmico y las variables del entorno por ciudad, verifica datos de sensación térmica, humedad y velocidad del viento en zonas de interés.
   
