@@ -25,7 +25,7 @@ Este pipeline se diseñó con un doble propósito: resolver un problema analíti
 Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
 
 **El objetivo de este pipeline es:**
-1. **Automatizar** Automatizar la extracción diaria para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
+1. **Automatizar** la extracción diaria de datos para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
    * *Tech note:* La selección de ciudades se desacopló del código mediante un archivo `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita.
 2. **Estandarizar y limpiar** la información en un repositorio centralizado.
 3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
@@ -36,19 +36,19 @@ Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline 
 
 El flujo está diseñado para transformar datos crudos en insights de negocio:
 
-### 1. 🥉 Bronze Layer (Ingesta Raw)
+### 1. Bronze Layer (Ingesta Raw)
 * **Fuente:** API OpenWeather (Endpoints `/weather` y `/air_pollution`).
 * **Proceso:** Extracción vía `requests` validando códigos de estado HTTP (200 OK).
 * **Almacenamiento:** Archivos JSON crudos guardados localmente para auditoría histórica.
 
-### 2. 🥈 Silver Layer (Limpieza y Normalización)
+### 2. Silver Layer (Limpieza y Normalización)
 * **Transformación:**
     * **Flattening:** Aplanamiento de estructuras JSON anidadas (diccionarios dentro de listas) usando Python y Pandas.
     * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
 * **Almacenamiento:** Archivos **CSV** con particionamiento tipo Hive (`year=YYYY/month=MM/day=DD`) para optimizar la organización y consulta.
 * **Carga DB:** Ingesta de datos limpios hacia **PostgreSQL** mediante `SQLAlchemy`.
 
-### 3. 🥇 Gold Layer (Reportes de Negocio)
+### 3. Gold Layer (Reportes de Negocio)
 * **Lógica de Negocio:** Enriquecimiento de datos aplicando reglas de clasificación (ej. Calidad de aire "Peligrosa" si PM2.5 > 55).
 * **Outputs Generados:** Rankings de contaminación y resúmenes nacionales agrupados.
 
@@ -76,7 +76,7 @@ Se eligió Airflow porque permite tener mayor control sobre el flujo completo de
 
 ---
 
-## 🗄️ Modelado Dimensional (Capa Gold / Data Warehouse)
+## Modelado Dimensional (Star Schema)
 
 Para realizar consultas analíticas, los datos planos de la capa Silver se transforman y cargan en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
 
