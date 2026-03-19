@@ -20,7 +20,7 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ## Contexto y Alcance del Proyecto (Business Case & Scope)
 
-Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
+Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta de una API, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
 
 Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
 
@@ -78,9 +78,9 @@ Se eligió Airflow porque permite tener mayor control sobre el flujo completo de
 
 ## 🗄️ Modelado Dimensional (Capa Gold / Data Warehouse)
 
-Para habilitar consultas analíticas rápidas y eficientes, los datos planos de la capa Silver se transforman y cargan (proceso ELT) en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
+Para realizar consultas analíticas, los datos planos de la capa Silver se transforman y cargan en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
 
-Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
+Esta arquitectura separa lo descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
 <img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
@@ -94,7 +94,7 @@ Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas,
 * **Dimensiones (Contexto):**
   * `dim_location`: Entidad geográfica única (`city`, `country`).
   * `dim_time`: Dimensión de tiempo granular para análisis.
-  * `dim_weather_condition`: Catálogo estandarizado de condiciones climáticas.
+  * `dim_weather_condition`: Catálogo de condiciones climáticas.
   * `dim_air_quality`: Clasificación del Índice de Calidad del Aire (AQI) y su estado descriptivo (ej. Bueno, Moderado, Peligroso).
 * **Tabla de Hechos (Métricas):**
   * `fact_weather_metrics`: Tabla central optimizada con `Surrogate Keys` (IDs numéricos incrementales) que almacena las métricas meteorológicas y de calidad del aire (`temperature_c`, `pm2_5_level`, `wind_speed_ms`, etc.).
@@ -111,27 +111,35 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 <img width="1876" height="417" alt="image" src="https://github.com/user-attachments/assets/82c852c3-df46-4376-b971-b3777bdf013c" />
 
 
-*Nota: Todo el contexto descriptivo (como el nombre de la ciudad o la descripción del clima) fue extraído hacia las dimensiones, dejando la capa Gold limpia y lista para su consumo analítico.*
-
 ### Casos de Uso Analítico (Business Value)
-El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
+
+El diseño relacional del Data Warehouse permite responder preguntas críticas de negocio cruzando las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
-<summary> Ver SQL: Top 5 Ciudades más calurosas...</summary>
+<summary><b>Consulta 1: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Ranking de Contaminación)</b></summary>
+
+*Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
+
 ```sql
-SELECT
+SELECT 
     l.city AS ciudad,
     l.country AS pais,
-    ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
-    MAX(f.pm2_5_level) AS pico_maximo_pm25
-FROM dwh.fact_weather_metrics f
-JOIN dwh.dim_location l ON f.location_id = l.location_id
+    ROUND(AVG(f.aqi_id)::NUMERIC, 1) AS aqi_promedio,
+    ROUND(AVG(f.pm2_5_level)::NUMERIC, 2) AS pm2_5_promedio,
+    MAX(a.estado) AS estado
+FROM dwh.fact_weather_metrics AS f
+JOIN dwh.dim_location AS l 
+ON f.location_id = l.location_id
+JOIN dwh.dim_air_quality AS a 
+ON f.aqi_id = a.aqi_id
 GROUP BY l.city, l.country
-ORDER BY temperatura_promedio_c DESC
+ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
 LIMIT 5;
-```
+<img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" />
 
 </details>
+
+<details>
 
 ---
 
