@@ -116,7 +116,7 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 El diseño relacional del Data Warehouse permite responder preguntas de negocio uniendo las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
-<summary><b>Consulta 1 SQL: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Más contaminadas)</b></summary>
+<summary><b>Consulta 1 SQL: Top 5 Ciudades más Contaminadas (Clasificación de Riesgo según Promedios de PM2.5)</b></summary>
 
 *Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
 
@@ -124,19 +124,20 @@ El diseño relacional del Data Warehouse permite responder preguntas de negocio 
 SELECT 
     l.city AS ciudad,
     l.country AS pais,
-    ROUND(AVG(f.aqi_id)::NUMERIC, 1) AS aqi_promedio,
     ROUND(AVG(f.pm2_5_level)::NUMERIC, 2) AS pm2_5_promedio,
-    MAX(a.estado) AS estado
+    CASE 
+        WHEN AVG(f.pm2_5_level) <= 12 THEN 'Bueno'
+        WHEN AVG(f.pm2_5_level) <= 35 THEN 'Moderado'
+        ELSE 'Malo'
+    END AS clasificacion
 FROM dwh.fact_weather_metrics AS f
 JOIN dwh.dim_location AS l 
 ON f.location_id = l.location_id
-JOIN dwh.dim_air_quality AS a 
-ON f.aqi_id = a.aqi_id
 GROUP BY l.city, l.country
-ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
+ORDER BY pm2_5_promedio DESC
 LIMIT 5;
 ```
-<img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" /> 
+<img width="647" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/00a6cb26-91fa-4a06-a79d-5bdd64b7bcea" />
 
 </details>
 
