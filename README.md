@@ -136,9 +136,9 @@ GROUP BY l.city, l.country
 ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
 LIMIT 5;
 
-<img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" /> </details>
-
-<details>
+<img width="909" alt="sql_response_1" src=<img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/74874ef0-52da-4fe1-ab87-8c2c3f6089b9" />
+ />
+</details>
 
 ---
 
