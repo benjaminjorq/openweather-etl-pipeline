@@ -168,6 +168,41 @@ LIMIT 10;
 
 </details>
 
+<details>
+<summary><b>Consulta 2: Estado Térmico Actual por Ciudad (Simulación) </b></summary>
+
+*Analiza el confort térmico y las variables del entorno por ciudad, verifica datos de sensación térmica, humedad y velocidad del viento en zonas de interés.
+  
+```sql
+WITH reporte_clima AS (
+    SELECT 
+        location_id,
+        ROUND(AVG(temperature_c)::NUMERIC, 1) AS temperatura_c,
+        ROUND(AVG(feels_like_c)::NUMERIC, 1) AS sensacion_termica_c,
+        ROUND(AVG(humidity_pct)::NUMERIC, 1) AS humedad_pct,
+        ROUND(AVG(pressure_hpa)::NUMERIC, 0) AS presion_hpa,
+        ROUND(AVG(wind_speed_ms)::NUMERIC, 1) AS velocidad_viento_ms
+    FROM dwh.fact_weather_metrics
+    GROUP BY location_id
+)
+SELECT 
+    l.city AS ciudad,
+    l.country AS pais,
+    rc.temperatura_c,
+    rc.sensacion_termica_c,
+    rc.humedad_pct,
+    rc.presion_hpa,
+    rc.velocidad_viento_ms
+FROM dwh.dim_location AS l
+JOIN reporte_clima AS rc
+ON l.location_id = rc.location_id
+ORDER BY rc.temperatura_c DESC
+LIMIT 10;
+```
+<img width="1076" height="401" alt="sql3" src="https://github.com/user-attachments/assets/20590d53-ede3-4535-a92f-e24d235bc55f" />
+
+</details>
+
 ---
 
 ## Tech Stack & Librerías
