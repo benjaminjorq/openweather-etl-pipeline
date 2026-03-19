@@ -139,6 +139,7 @@ LIMIT 5;
 <img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" /> 
 
 </details>
+
 ---
 
 ## Tech Stack & Librerías
