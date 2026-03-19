@@ -164,7 +164,7 @@ GROUP BY l.city, l.country
 ORDER BY pm10_promedio ASC
 LIMIT 10;
 ```
-<img width="724" height="254" alt="sql 1" src= <img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
+<img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
 
 </details>
 
