@@ -129,14 +129,13 @@ SELECT
     MAX(a.estado) AS estado
 FROM dwh.fact_weather_metrics AS f
 JOIN dwh.dim_location AS l 
-ON f.location_id = l.location_id
+    ON f.location_id = l.location_id
 JOIN dwh.dim_air_quality AS a 
-ON f.aqi_id = a.aqi_id
+    ON f.aqi_id = a.aqi_id
 GROUP BY l.city, l.country
 ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
 LIMIT 5;
-```
-
+<img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" /> </details>
 ---
 
 ## Tech Stack & Librerías
