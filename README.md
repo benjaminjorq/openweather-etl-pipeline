@@ -116,7 +116,7 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 El diseño relacional del Data Warehouse permite responder preguntas críticas de negocio cruzando las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
-<summary><b>Consulta 1: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Ranking de Contaminación)</b></summary>
+<summary><b>Consulta 1: Top 5 Ciudades con Mayor Indice de Calidad de Aire (AQI) (Más contaminadas)</b></summary>
 
 *Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
 
@@ -137,6 +137,34 @@ ORDER BY aqi_promedio DESC, pm2_5_promedio DESC
 LIMIT 5;
 ```
 <img width="724" height="254" alt="sql 1" src="https://github.com/user-attachments/assets/c0667b76-ab11-4925-9746-c88085c24b36" /> 
+
+</details>
+
+<details>
+<summary><b>Consulta 2: Top 10 Ciudades con Aire más Limpio en Chile </b></summary>
+
+*Identifica las 10 ciudades de Chile con los niveles más bajos de partículas suspendidas (PM10) y emisiones vehiculares (CO), generando un ranking nacional de limpieza junto a su temperatura promedio.
+  
+```sql
+SELECT 
+    l.city AS ciudad,
+    l.country AS pais,
+    ROUND(AVG(f.pm10_level)::NUMERIC, 2) AS pm10_promedio,
+    ROUND(AVG(f.co_level)::NUMERIC, 2) AS co_promedio,
+    ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
+    RANK() OVER(ORDER BY AVG(f.pm10_level) ASC) AS ranking_nacional_aire_limpio,
+    MAX(a.estado) AS estado_general_aire
+FROM dwh.fact_weather_metrics AS f
+JOIN dwh.dim_location AS l 
+ON f.location_id = l.location_id
+JOIN dwh.dim_air_quality AS a 
+ON f.aqi_id = a.aqi_id
+WHERE l.country = 'CL'
+GROUP BY l.city, l.country
+ORDER BY pm10_promedio ASC
+LIMIT 10;
+```
+<img width="724" height="254" alt="sql 1" src= <img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
 
 </details>
 
