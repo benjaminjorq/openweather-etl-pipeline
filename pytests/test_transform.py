@@ -5,7 +5,10 @@ from src.transform.openweather_batch_transform import clean_and_normalize
 # 1. Creamos un DataFrame sucio para probar la función clean_and_normalize
 
 def create_raw_dataset():
-    """Simula un set de datos sucios con errores comunes (espacios, nulos, formatos)"""
+    """
+    Simula un set de datos sucios con errores comunes (espacios, nulos, formatos)
+
+    """
     raw_data = {
         "city": ["  Concepcion  ", "Santiago"],     # Espacios extra
         "temperature_c": ["15.5", 25.0],            # Mezcla texto/número
@@ -20,7 +23,10 @@ def create_raw_dataset():
 # 2. Pruebas
 
 def test_string_cleaning():
-    """Verifica la limpieza de strings: eliminación de espacios, manejo de nulos y capitalización."""
+    """
+    Verifica la limpieza de strings: eliminación de espacios, manejo de nulos y capitalización.
+
+    """
 
     raw_df = create_raw_dataset()
     processed_df = clean_and_normalize(raw_df)
@@ -30,7 +36,10 @@ def test_string_cleaning():
     assert processed_df.iloc[0]["weather_desc"] == "Heavy rain"
 
 def test_numeric_casting():
-    """Valida que los textos numéricos se conviertan correctamente a tipos float o int."""
+    """
+    Valida que los textos numéricos se conviertan correctamente a tipos float o int.
+
+    """
 
     raw_df = create_raw_dataset()
     processed_df = clean_and_normalize(raw_df)
@@ -40,7 +49,10 @@ def test_numeric_casting():
     assert processed_df.iloc[0]["humidity_pct"] == 80
 
 def test_date_conversion():
-    """Comprueba que processed_timestamp se transforme al tipo datetime."""
+    """
+    Comprueba que processed_timestamp se transforme al tipo datetime.
+    
+    """
 
     raw_df = create_raw_dataset()
     processed_df = clean_and_normalize(raw_df)

@@ -28,23 +28,31 @@ logging.basicConfig(
 # 3. Función para obtener archivo fuente
 
 def get_latest_bronze_file():
-    """
-    Objetivo: Identifica el JSON más reciente en la capa Bronze para procesarlo.
-    Solución de Fallos: FileNotFoundError indica que la tarea de ingesta no corrió o falló antes.
+    """Obtiene el archivo JSON más reciente de la capa Bronze.
+
+    Returns:
+        Path: Ruta del archivo Bronze más reciente.
+
+    Raises:
+        FileNotFoundError: Si no existen archivos en Bronze (indica fallo en la ingesta).
     """
     files = list(BRONZE_FOLDER.glob("*.json"))
     if not files:
-        raise FileNotFoundError("Directorio Bronze vacío.")
-    return max(files, key=lambda f: f.stat().st_mtime)  #Lee el último registro desde Bronze
+        raise FileNotFoundError("Directorio Bronze vacío. No hay datos para transformar")
+    return max(files, key=lambda f: f.stat().st_mtime)  
 
 # 4. Función de Lógica de Negocio y Limpieza
 
 def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
+    """Limpia, normaliza y valida los datos.
+
+    Args:
+        df (pd.DataFrame): DataFrame proveniente de Bronze.
+
+    Returns:
+        pd.DataFrame: DataFrame procesado, limpio y validado.
     """
-    Objetivo: Limpia, normaliza y filtra datos inválidos asegurando la calidad de la capa Silver.
-    Retorna: DataFrame con datos limpios listos para la siguiente etapa.
-    """
-    logging.info(f"DataFrame antes de Transformar: {df.head()}")
+
     logging.info(f"Total de Filas antes de Transformar: {len(df)}")
     logging.info(f"Tipos de Datos antes de Transformar: {df.dtypes}")
 
@@ -84,10 +92,10 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 
 def start_transformation_process():
     """
-    Orquesta el proceso de transformación de datos desde la capa Bronze a Silver.
+    Orquesta la extracción, aplanamiento, filtrado y particionado.
 
-    Extrae el JSON más reciente, normaliza su estructura anidada y estandariza el esquema final. Aplica validaciones de calidad de datos
-    y persiste el resultado como un archivo CSV particionado por fecha.
+    Raises:
+        RuntimeError: Si ocurre un fallo crítico durante el proceso de transformación.
 
     """
     logging.info("Iniciando proceso de Transformación")
@@ -168,7 +176,8 @@ def start_transformation_process():
         logging.info(f"Transformación completada. CSV guardado: {filename}")
 
     except Exception as e:
-        logging.critical(f"Fallo crítico en transformación: {e}", exc_info=True)
+        logging.critical(f"Fallo crítico en transformación: {e}")
+        raise RuntimeError("Error en proceso de transformación") from e
 
 if __name__ == "__main__":
     start_transformation_process()

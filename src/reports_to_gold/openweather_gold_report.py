@@ -35,9 +35,13 @@ logging.basicConfig(
 
 def get_overall_status(aqi_mean):
     """
-    Objetivo: Define el estado general del aire basándose en el promedio del índice AQI.
-    El índice original de OpenWeather va de 1 (Excelente) a 5 (Peligroso).
-    Como estamos usando promedios, usamos rangos decimales.
+    Clasifica el estado de calidad del aire a partir del promedio del índice AQI.
+
+    Args:
+        aqi_mean (float): Valor promedio del índice de calidad del aire.
+
+    Returns:
+        str: Categoría de calidad del aire.
     """
     if pd.isna(aqi_mean): 
         return "Desconocido"
@@ -55,8 +59,10 @@ def get_overall_status(aqi_mean):
 
 def create_gold_reports():
     """
-    Objetivo: Consolida la data Silver diaria en tablas numéricas optimizadas para BI,
-    incluyendo variables meteorológicas clave (viento, presión..etc) que explican el estado del Aire.
+    Genera reportes agregados en la capa Gold a partir de datos diarios de la capa Silver.
+
+    Returns:
+        None
     """
     logging.info("Inicio de generación de reportes")
     
@@ -171,7 +177,7 @@ def create_gold_reports():
     logging.info("\n" + view_summary.to_string(index=False, justify='left'))
     logging.info(f"\nGuardado en: {summary_path.name}")
 
-# 12. Ejecución del Script
+# 6. Ejecución del Script
 
 if __name__ == "__main__":
     create_gold_reports()

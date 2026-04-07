@@ -34,7 +34,8 @@ logging.basicConfig(
 # 3. Función Auxiliar: Cargar Ciudades
 
 def load_cities_config():
-    """Lee el archivo de configuración yaml de las ciudades a procesar.
+    """
+    Lee el archivo de configuración YAML de las ciudades a procesar.
 
     Returns:
         list[dict]: Lista de diccionarios con las claves 'name', 'lat' y 'lon'.
@@ -59,7 +60,8 @@ def load_cities_config():
 # 4. API 1: Obtener Datos del Clima (Weather)
 
 def get_weather_data(lat:float, lon:float):
-    """Obtiene los datos meteorológicos para unas coordenadas definidas.
+    """
+    Obtiene los datos meteorológicos para unas coordenadas definidas.
 
     Args:
         lat (float): Latitud de la ciudad.
@@ -86,8 +88,9 @@ def get_weather_data(lat:float, lon:float):
 
 # 5. API 2: Obtener Datos de Polución (Air Pollution)
 
-def get_pollution_data(lat, lon):
-    """Obtiene los datos de contaminación atmosférica para unas coordenadas definidas.
+def get_pollution_data(lat:float, lon:float):
+    """
+    Obtiene los datos de contaminación atmosférica para unas coordenadas definidas.
 
     Args:
         lat (float): Latitud de la ciudad.
@@ -115,16 +118,20 @@ def get_pollution_data(lat, lon):
 # 6. Función: Guardar en Bronze
 
 def save_to_bronze(data_buffer):
-    """Guarda datos crudos en la capa Bronze como archivo JSON.
+    """
+    Guarda datos crudos en la capa Bronze como archivo JSON.
 
     Genera un archivo con timestamp único para mantener histórico de datos
     sin sobrescribir ejecuciones anteriores.
 
     Args:
-        data_buffer (list[dict]): Datos recolectados desde las APIs.
+        data_buffer (list[dict]): Lista de registros recolectados desde las APIs.
 
     Returns:
         None
+
+    Raises:
+        RuntimeError: Si ocurre un error al guardar el archivo.
     """
     try:
         timestamp_str = datetime.now().strftime('%Y_%m_%d_%H%M%S')
@@ -144,22 +151,11 @@ def save_to_bronze(data_buffer):
 # 7. Proceso Principal
 
 def start_ingestion_process():
-
     """
-    Orquesta el proceso de ingesta de datos.
-
-    Flujo:
-        1. Carga configuración de ciudades
-        2. Itera sobre ciudades de interés
-        3. Consulta APIs externas (Peticiones HTTP)
-        4. Valida respuestas
-        5. Guarda datos en Bronze
-
-    Returns:
-        None
+    Ejecuta el proceso de ingesta de datos desde APIs externas hacia la capa Bronze.
 
     Raises:
-        RuntimeError: Si falta la API Key.
+        RuntimeError: Si la API Key no está definida.
     """
 
     logging.info("Iniciando proceso de Ingesta")
@@ -175,29 +171,23 @@ def start_ingestion_process():
         lat = city.get("lat")
         lon = city.get("lon")
         
-        logging.info(f" Descargando datos de la Ciudad de: {name}")
+        logging.info(f"Descargando datos de la Ciudad de: {name}")
 
-        # Llamada A: Clima
         weather_result = get_weather_data(lat, lon)
-
-        # Llamada B: Polución
         pollution_result = get_pollution_data(lat, lon)
-
-        # 8. Validación 
-        # Solo guardamos si AMBAS llamadas respondieron correctamente
 
         if weather_result and pollution_result:
             record = {
                 "city_metadata": city,
                 "ingestion_timestamp": datetime.now().isoformat(),
-                "weather_raw_data": weather_result,  # Respuesta de API 1
-                "pollution_raw_data": pollution_result # Respuesta de API 2
+                "weather_raw_data": weather_result,  
+                "pollution_raw_data": pollution_result 
             }
             raw_data_buffer.append(record)
         else:
             logging.warning(f"Datos incompletos para {name}. Se omite registro.")
 
-    # 9. Persistencia
+    # 8. Guardado
 
     if raw_data_buffer:
         save_to_bronze(raw_data_buffer)

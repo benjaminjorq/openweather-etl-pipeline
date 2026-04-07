@@ -20,7 +20,7 @@ with DAG(
     dag_id='openweather_pipeline_ETL',
     default_args=default_args,
     description='ETL Clima Chile: Arquitectura Medallion con carga a PostgreSQL',
-    schedule_interval='0 * * * *', # Se ejecuta una vez por hora (minuto 0)
+    schedule_interval='0 * * * *', 
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"), # Hora local de Chile
     catchup=False,
     tags=['OpenWeather Extract-Transform-Load'],
