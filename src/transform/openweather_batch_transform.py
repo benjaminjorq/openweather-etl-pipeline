@@ -58,7 +58,7 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 
     df["city"] = df["city"].astype(str).str.strip()
     df["country"] = df["country"].fillna("Unknown").astype(str).str.strip()
-    df["weather_desc"] = df["weather_desc"].astype(str).str.strip().str.capitalize()
+    df["weather_desc"] = df["weather_desc"].fillna("").astype(str).str.strip().str.capitalize()
 
     # Conversión de Fecha 
 
@@ -78,19 +78,20 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df[(df["temperature_c"] > -90) & (df["temperature_c"] < 60)]
 
-    
-    
     return df
 
 # 5. Proceso Principal de Transformación
 
 def start_transformation_process():
     """
-    Objetivo: Orquesta la transformación, aplanamiento del JSON anidado, limpieza y guardado particionado.
-    Solución de Fallos: Si ocurren excepciones aquí, verificar cambios en la estructura de la API.
+    Orquesta el proceso de transformación de datos desde la capa Bronze a Silver.
+
+    Extrae el JSON más reciente, normaliza su estructura anidada y estandariza el esquema final. Aplica validaciones de calidad de datos
+    y persiste el resultado como un archivo CSV particionado por fecha.
+
     """
-    logging.info("Iniciando Proceso de Transformación")
-    
+    logging.info("Iniciando proceso de Transformación")
+
     try:
         file_path = get_latest_bronze_file()
         logging.info(f"Procesando archivo: {file_path.name}")
@@ -98,67 +99,76 @@ def start_transformation_process():
         with open(file_path, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
 
-        clean_rows = []
+        if not raw_data:
+            logging.warning("El JSON está vacío.")
+            return
+
+        # 1. Flatten del JSON anidado
+
+        df = pd.json_normalize(raw_data)
+
+        # 2. Renombrar columnas 
+
+        df = df.rename(columns={
+            "city_metadata.name": "city",
+            "weather_raw_data.sys.country": "country",
+            "weather_raw_data.main.temp": "temperature_c",
+            "weather_raw_data.main.feels_like": "feels_like_c",
+            "weather_raw_data.main.humidity": "humidity_pct",
+            "weather_raw_data.main.pressure": "pressure_hpa",
+            "weather_raw_data.wind.speed": "wind_speed_ms",
+        })
+
+        # 3. Extracción del Clima
+
+        if "weather_raw_data.weather" in df.columns:
+            df["weather_desc"] = df["weather_raw_data.weather"].str[0].str.get("description")
+
+        # 4. Extracción de Polución
+
+        if "pollution_raw_data.list" in df.columns:
+            pollution = df["pollution_raw_data.list"].str[0] 
+            
+            df["aqi"] = pollution.str["main"].str["aqi"]
+            df["co_level"] = pollution.str["components"].str["co"]
+            df["no2_level"] = pollution.str["components"].str["no2"]
+            df["o3_level"] = pollution.str["components"].str["o3"]
+            df["pm2_5_level"] = pollution.str["components"].str["pm2_5"]
+            df["pm10_level"] = pollution.str["components"].str["pm10"]
+
+        # 5. Timestamp del batch
+
+        df["processed_timestamp"] = datetime.now().replace(second=0, microsecond=0)
+
+        columnas_finales = [
+            "city", "country", "temperature_c", "feels_like_c", "humidity_pct",
+            "pressure_hpa", "wind_speed_ms", "weather_desc", "aqi", "co_level",
+            "no2_level", "o3_level", "pm2_5_level", "pm10_level", "processed_timestamp"
+        ]
         
-        # 6. Aplanamiento de datos (Flattening)
+        df = df.reindex(columns=columnas_finales)
 
-        batch_timestamp = datetime.now().replace(second=0, microsecond=0)    # Hace que todos los datos tengan la misma hora en el output
+        # 6. Creación y Persistencia del DataFrame
 
-        for record in raw_data:
-            try:
-                meta = record.get("city_metadata", {}) # Extrae los metadatos de la ciudad (nombre, lat, lon)
-                weather = record.get("weather_raw_data", {}) # Extrae raw data del Clima
-                pollution = record.get("pollution_raw_data", {}).get("list", [{}])[0] # Extrae raw data de Polución (usa fallback para prevenir un IndexError)
-                
-                row = {
-                    # Datos Clima (weather)
-                    "city": meta.get("name"),
-                    "country": weather.get("sys", {}).get("country"),
-                    "temperature_c": weather.get("main", {}).get("temp"),
-                    "feels_like_c": weather.get("main", {}).get("feels_like"),
-                    "humidity_pct": weather.get("main", {}).get("humidity"),
-                    "pressure_hpa": weather.get("main", {}).get("pressure"),
-                    "wind_speed_ms": weather.get("wind", {}).get("speed"),
-                    "weather_desc": weather.get("weather", [{}])[0].get("description"),
+        df = clean_and_normalize(df)
+        
+        if df.empty:
+            logging.warning("Todos los datos fueron filtrados por calidad.")
+            return
 
-                    # Datos Polución (pollution)
-                    "aqi": pollution.get("main", {}).get("aqi"),
-                    "co_level": pollution.get("components", {}).get("co"),      
-                    "no2_level": pollution.get("components", {}).get("no2"),    
-                    "o3_level": pollution.get("components", {}).get("o3"),
-                    "pm2_5_level": pollution.get("components", {}).get("pm2_5"),
-                    "pm10_level": pollution.get("components", {}).get("pm10"),
-                    "processed_timestamp": batch_timestamp
-                }
-                clean_rows.append(row)
-            except Exception as e:
-                logging.warning(f"Error procesando registro individual: {e}")
+        # 7. Particionamiento por fecha
 
-        # 7. Creación y Persistencia del DataFrame
-
-        if clean_rows:
-            df = pd.DataFrame(clean_rows)
-            df = clean_and_normalize(df)
-            
-            if df.empty:
-                logging.warning("Todos los datos fueron filtrados por calidad.")
-                return
-
-            # Particionamiento por fecha
-
-            now = datetime.now()
-            output_dir = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            
-            filename = f"clean_weather_data_{now.strftime('%H_%M_%S')}.csv"
-            df.to_csv(output_dir / filename, index=False)
-            
-            logging.info(f"Transformación completada. CSV guardado: {filename}")
-        else:
-            logging.warning("No se generaron registros válidos para transformar.")
+        now = datetime.now()
+        output_dir = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        filename = f"clean_weather_data_{now.strftime('%H_%M_%S')}.csv"
+        df.to_csv(output_dir / filename, index=False)
+        
+        logging.info(f"Transformación completada. CSV guardado: {filename}")
 
     except Exception as e:
-        logging.critical(f"Fallo crítico en transformación: {e}")
+        logging.critical(f"Fallo crítico en transformación: {e}", exc_info=True)
 
 if __name__ == "__main__":
     start_transformation_process()

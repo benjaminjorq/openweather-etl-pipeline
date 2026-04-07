@@ -34,32 +34,42 @@ logging.basicConfig(
 # 3. Función Auxiliar: Cargar Ciudades
 
 def load_cities_config():
+    """Lee el archivo de configuración yaml de las ciudades a procesar.
+
+    Returns:
+        list[dict]: Lista de diccionarios con las claves 'name', 'lat' y 'lon'.
+
+    Raises:
+        FileNotFoundError: Si el archivo no existe.
+        RuntimeError: Si ocurre un error al leer el archivo.
     """
-    Objetivo: Lee el archivo YAML de configuración para obtener las ciudades.
-    Retorna: Lista de diccionarios con metadatos de las ciudades (name, lat, lon).
-    Solución de Fallos: Si retorna vacío, verifica que 'config/cities.yaml' exista y tenga un formato válido.
-    """
+
     if not CITIES_FILE.exists():
         logging.error(f"Archivo de configuración no encontrado: {CITIES_FILE}")
-        return []
+        raise FileNotFoundError(f"No se encontró el archivo: {CITIES_FILE}")
+    
     try:
         with open(CITIES_FILE, "r", encoding="utf-8") as file:
             return yaml.safe_load(file).get("cities", [])
+        
     except Exception as e:
         logging.error(f"Error leyendo YAML: {e}")
-        return []
+        raise RuntimeError("Fallo procesando archivo YAML") from e
 
 # 4. API 1: Obtener Datos del Clima (Weather)
 
-def get_weather_data(lat, lon):
-    """
-    Objetivo: Extrae métricas climáticas actuales (temperatura, humedad).
-    Solución de Fallos: 
-    - Fallo 401: Validar que OPENWEATHER_API_KEY en .env sea correcta.
-    - Timeout: Revisar la conectividad de red del contenedor Docker.
+def get_weather_data(lat:float, lon:float):
+    """Obtiene los datos meteorológicos para unas coordenadas definidas.
+
+    Args:
+        lat (float): Latitud de la ciudad.
+        lon (float): Longitud de la ciudad.
+
+    Returns:
+        dict | None: JSON con los datos del Clima. Retorna None si falla.
     """
     try:
-        # URL API Weather
+        
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
         
         response = requests.get(url, timeout=10)
@@ -67,8 +77,9 @@ def get_weather_data(lat, lon):
         if response.status_code == 200:
             return response.json()
         else:
-            logging.warning(f"API Weather Fallo: {response.status_code} - {response.text}")
+            logging.warning(f"API Weather Fallo: {response.status_code}")
             return None
+        
     except Exception as e:
         logging.error(f"API Weather Error de conexión: {e}")
         return None
@@ -76,12 +87,17 @@ def get_weather_data(lat, lon):
 # 5. API 2: Obtener Datos de Polución (Air Pollution)
 
 def get_pollution_data(lat, lon):
-    """
-    Objetivo: Extrae métricas de calidad del aire (PM2.5, PM10, CO, NO2, O3).
-    Solución de Fallos: Similar a get_weather_data. Verificar límites de la API si devuelve 429 (Rate Limit).
+    """Obtiene los datos de contaminación atmosférica para unas coordenadas definidas.
+
+    Args:
+        lat (float): Latitud de la ciudad.
+        lon (float): Longitud de la ciudad.
+
+    Returns:
+        dict | None: JSON con los datos de polución. Retorna None si falla.
     """
     try:
-        # URL API Air Pollution
+        
         url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
         
         response = requests.get(url, timeout=10)
@@ -89,8 +105,9 @@ def get_pollution_data(lat, lon):
         if response.status_code == 200:
             return response.json()
         else:
-            logging.warning(f"API Air Pollution: {response.status_code} - {response.text}")
+            logging.warning(f"API Air Pollution: {response.status_code}")
             return None
+        
     except Exception as e:
         logging.error(f"API Air Pollution - Error de conexión: {e}")
         return None
@@ -98,9 +115,16 @@ def get_pollution_data(lat, lon):
 # 6. Función: Guardar en Bronze
 
 def save_to_bronze(data_buffer):
-    """
-    Objetivo: Guarda el buffer acumulado de datos en la capa Bronze local.
-    Solución de Fallos: Revisar si la carpeta de destino esté bloqueada o no exista; revisar la configuración de carpetas bronze/data.
+    """Guarda datos crudos en la capa Bronze como archivo JSON.
+
+    Genera un archivo con timestamp único para mantener histórico de datos
+    sin sobrescribir ejecuciones anteriores.
+
+    Args:
+        data_buffer (list[dict]): Datos recolectados desde las APIs.
+
+    Returns:
+        None
     """
     try:
         timestamp_str = datetime.now().strftime('%Y_%m_%d_%H%M%S')
@@ -111,21 +135,37 @@ def save_to_bronze(data_buffer):
             json.dump(data_buffer, file, indent=2)
             
         logging.info(f"Archivo guardado exitosamente: {filename}")
+
     except Exception as e:
-        logging.critical(f"Error de disco: {e}")
+
+        logging.critical(f"Error en guardado: {e}")
+        raise RuntimeError("Error guardando archivo en Bronze") from e
 
 # 7. Proceso Principal
 
 def start_ingestion_process():
 
     """
-    Objetivo: Orquesta la ingesta iterando por cada ciudad y uniendo las respuestas de ambas APIs.
-    Solución de Fallos: Si falta la API_KEY, el proceso aborta para no quemar ejecuciones en vano.
+    Orquesta el proceso de ingesta de datos.
+
+    Flujo:
+        1. Carga configuración de ciudades
+        2. Itera sobre ciudades de interés
+        3. Consulta APIs externas (Peticiones HTTP)
+        4. Valida respuestas
+        5. Guarda datos en Bronze
+
+    Returns:
+        None
+
+    Raises:
+        RuntimeError: Si falta la API Key.
     """
+
     logging.info("Iniciando proceso de Ingesta")
     if not API_KEY:
         logging.critical("API Key no definida.")
-        return
+        raise RuntimeError("Falta OPENWEATHER_API_KEY")
 
     cities = load_cities_config()
     raw_data_buffer = []
