@@ -20,12 +20,12 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ## Contexto y Alcance del Proyecto (Business Case & Scope)
 
-Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
+Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta de una API, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
 
 Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
 
 **El objetivo de este pipeline es:**
-1. **Automatizar** Automatizar la extracción diaria para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
+1. **Automatizar** la extracción diaria de datos para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
    * *Tech note:* La selección de ciudades se desacopló del código mediante un archivo `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita.
 2. **Estandarizar y limpiar** la información en un repositorio centralizado.
 3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
@@ -36,19 +36,19 @@ Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline 
 
 El flujo está diseñado para transformar datos crudos en insights de negocio:
 
-### 1. 🥉 Bronze Layer (Ingesta Raw)
+### 1. Bronze Layer (Ingesta Raw)
 * **Fuente:** API OpenWeather (Endpoints `/weather` y `/air_pollution`).
 * **Proceso:** Extracción vía `requests` validando códigos de estado HTTP (200 OK).
 * **Almacenamiento:** Archivos JSON crudos guardados localmente para auditoría histórica.
 
-### 2. 🥈 Silver Layer (Limpieza y Normalización)
+### 2. Silver Layer (Limpieza y Normalización)
 * **Transformación:**
     * **Flattening:** Aplanamiento de estructuras JSON anidadas (diccionarios dentro de listas) usando Python y Pandas.
     * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
 * **Almacenamiento:** Archivos **CSV** con particionamiento tipo Hive (`year=YYYY/month=MM/day=DD`) para optimizar la organización y consulta.
 * **Carga DB:** Ingesta de datos limpios hacia **PostgreSQL** mediante `SQLAlchemy`.
 
-### 3. 🥇 Gold Layer (Reportes de Negocio)
+### 3. Gold Layer (Reportes de Negocio)
 * **Lógica de Negocio:** Enriquecimiento de datos aplicando reglas de clasificación (ej. Calidad de aire "Peligrosa" si PM2.5 > 55).
 * **Outputs Generados:** Rankings de contaminación y resúmenes nacionales agrupados.
 
@@ -76,11 +76,11 @@ Se eligió Airflow porque permite tener mayor control sobre el flujo completo de
 
 ---
 
-## 🗄️ Modelado Dimensional (Capa Gold / Data Warehouse)
+## Modelado Dimensional (Star Schema)
 
-Para habilitar consultas analíticas rápidas y eficientes, los datos planos de la capa Silver se transforman y cargan (proceso ELT) en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
+Para realizar consultas analíticas, los datos planos de la capa Silver se transforman y cargan en un esquema de **Data Warehouse (`dwh`)** dentro de PostgreSQL siguiendo la metodología de **Modelo Estrella (Kimball)**.
 
-Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
+Esta arquitectura separa lo descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
 <img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
@@ -94,7 +94,7 @@ Esta arquitectura separa el contexto descriptivo de las métricas cuantitativas,
 * **Dimensiones (Contexto):**
   * `dim_location`: Entidad geográfica única (`city`, `country`).
   * `dim_time`: Dimensión de tiempo granular para análisis.
-  * `dim_weather_condition`: Catálogo estandarizado de condiciones climáticas.
+  * `dim_weather_condition`: Catálogo de condiciones climáticas.
   * `dim_air_quality`: Clasificación del Índice de Calidad del Aire (AQI) y su estado descriptivo (ej. Bueno, Moderado, Peligroso).
 * **Tabla de Hechos (Métricas):**
   * `fact_weather_metrics`: Tabla central optimizada con `Surrogate Keys` (IDs numéricos incrementales) que almacena las métricas meteorológicas y de calidad del aire (`temperature_c`, `pm2_5_level`, `wind_speed_ms`, etc.).
@@ -111,25 +111,96 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 <img width="1876" height="417" alt="image" src="https://github.com/user-attachments/assets/82c852c3-df46-4376-b971-b3777bdf013c" />
 
 
-*Nota: Todo el contexto descriptivo (como el nombre de la ciudad o la descripción del clima) fue extraído hacia las dimensiones, dejando la capa Gold limpia y lista para su consumo analítico.*
-
 ### Casos de Uso Analítico (Business Value)
-El diseño relacional permite responder preguntas de negocio complejas mediante consultas SQL eficientes. Algunos ejemplos implementados en este proyecto:
+
+El diseño relacional del Data Warehouse permite responder preguntas de negocio uniendo las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
-<summary> Ver SQL: Top 5 Ciudades más calurosas...</summary>
+<summary><b>Consulta 1 SQL: Top 5 Ciudades más Contaminadas (Clasificación de Riesgo según Promedios de PM2.5)</b></summary>
+
+*Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
+
 ```sql
-SELECT
+SELECT 
     l.city AS ciudad,
     l.country AS pais,
-    ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
-    MAX(f.pm2_5_level) AS pico_maximo_pm25
-FROM dwh.fact_weather_metrics f
-JOIN dwh.dim_location l ON f.location_id = l.location_id
+    ROUND(AVG(f.pm2_5_level)::NUMERIC, 2) AS pm2_5_promedio,
+    CASE 
+        WHEN AVG(f.pm2_5_level) <= 12 THEN 'Bueno'
+        WHEN AVG(f.pm2_5_level) <= 35 THEN 'Moderado'
+        ELSE 'Malo'
+    END AS clasificacion
+FROM dwh.fact_weather_metrics AS f
+JOIN dwh.dim_location AS l 
+ON f.location_id = l.location_id
 GROUP BY l.city, l.country
-ORDER BY temperatura_promedio_c DESC
+ORDER BY pm2_5_promedio DESC
 LIMIT 5;
 ```
+<img width="647" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/00a6cb26-91fa-4a06-a79d-5bdd64b7bcea" />
+
+</details>
+
+<details>
+<summary><b>Consulta 2 SQL: Top 10 Ciudades con Aire más Limpio en Chile </b></summary>
+
+*Identifica las 10 ciudades de Chile con los niveles más bajos de partículas suspendidas (PM10) y emisiones vehiculares (CO), generando un ranking nacional de limpieza junto a su temperatura promedio.
+  
+```sql
+SELECT 
+    l.city AS ciudad,
+    l.country AS pais,
+    ROUND(AVG(f.pm10_level)::NUMERIC, 2) AS pm10_promedio,
+    ROUND(AVG(f.co_level)::NUMERIC, 2) AS co_promedio,
+    ROUND(AVG(f.temperature_c)::NUMERIC, 1) AS temperatura_promedio_c,
+    RANK() OVER(ORDER BY AVG(f.pm10_level) ASC) AS ranking_nacional_aire_limpio,
+    MAX(a.estado) AS estado_general_aire
+FROM dwh.fact_weather_metrics AS f
+JOIN dwh.dim_location AS l 
+ON f.location_id = l.location_id
+JOIN dwh.dim_air_quality AS a 
+ON f.aqi_id = a.aqi_id
+WHERE l.country = 'CL'
+GROUP BY l.city, l.country
+ORDER BY pm10_promedio ASC
+LIMIT 10;
+```
+<img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
+
+</details>
+
+<details>
+<summary><b>Consulta 3 SQL: Estado Térmico Actual por Ciudad (Simulación) </b></summary>
+
+*Analiza el confort térmico y las variables del entorno por ciudad, verifica datos de sensación térmica, humedad y velocidad del viento en zonas de interés.
+  
+```sql
+WITH reporte_clima AS (
+    SELECT 
+        location_id,
+        ROUND(AVG(temperature_c)::NUMERIC, 1) AS temperatura_c,
+        ROUND(AVG(feels_like_c)::NUMERIC, 1) AS sensacion_termica_c,
+        ROUND(AVG(humidity_pct)::NUMERIC, 1) AS humedad_pct,
+        ROUND(AVG(pressure_hpa)::NUMERIC, 0) AS presion_hpa,
+        ROUND(AVG(wind_speed_ms)::NUMERIC, 1) AS velocidad_viento_ms
+    FROM dwh.fact_weather_metrics
+    GROUP BY location_id
+)
+SELECT 
+    l.city AS ciudad,
+    l.country AS pais,
+    rc.temperatura_c,
+    rc.sensacion_termica_c,
+    rc.humedad_pct,
+    rc.presion_hpa,
+    rc.velocidad_viento_ms
+FROM dwh.dim_location AS l
+JOIN reporte_clima AS rc
+ON l.location_id = rc.location_id
+ORDER BY rc.temperatura_c DESC
+LIMIT 10;
+```
+<img width="1076" height="401" alt="sql3" src="https://github.com/user-attachments/assets/20590d53-ede3-4535-a92f-e24d235bc55f" />
 
 </details>
 

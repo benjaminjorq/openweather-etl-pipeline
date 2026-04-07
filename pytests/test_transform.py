@@ -7,7 +7,7 @@ from src.transform.openweather_batch_transform import clean_and_normalize
 def create_raw_dataset():
     """Simula un set de datos sucios con errores comunes (espacios, nulos, formatos)"""
     raw_data = {
-        "city": ["  Concepcion  ", "Santiago"],      # Espacios extra
+        "city": ["  Concepcion  ", "Santiago"],     # Espacios extra
         "temperature_c": ["15.5", 25.0],            # Mezcla texto/número
         "humidity_pct": ["80", 60],                 # Mezcla texto/número
         "wind_speed_ms": ["10", 5],                 # Mezcla texto/número
@@ -20,47 +20,26 @@ def create_raw_dataset():
 # 2. Pruebas
 
 def test_string_cleaning():
-    # 1. Creamos datos sucios
+"""Verifica la limpieza de strings: eliminación de espacios, manejo de nulos y capitalización."""
     raw_df = create_raw_dataset()
-    
-    # 2. Ejecutamos la función de limpieza
     processed_df = clean_and_normalize(raw_df)
     
-    # 3. Verificar que los textos quedaron limpios
-    
-    # ¿Se quitaron los espacios extra?
     assert processed_df.iloc[0]["city"] == "Concepcion"
-    
-    # ¿Se rellenó el país faltante con 'Unknown'?
     assert processed_df.iloc[0]["country"] == "Unknown"
-    
-    # ¿Se corrigió la mayúscula inicial?
     assert processed_df.iloc[0]["weather_desc"] == "Heavy rain"
 
 def test_numeric_casting():
-    # 1. Creamos datos sucios
+"""Valida que los textos numéricos se conviertan correctamente a tipos float o int."""
     raw_df = create_raw_dataset()
-    
-    # 2. Ejecutamos la función de limpieza
     processed_df = clean_and_normalize(raw_df)
     
-    # 3. Verificamos la conversión a números
-
-    # ¿El texto "15.5" pasó a ser el número decimal 15.5?
     assert processed_df.iloc[0]["temperature_c"] == 15.5
     assert isinstance(processed_df.iloc[0]["temperature_c"], float)
-    
-    # ¿El texto "80" pasó a ser el entero 80?
     assert processed_df.iloc[0]["humidity_pct"] == 80
 
 def test_date_conversion():
-    # 1. Creamos datos sucios
+"""Comprueba que processed_tinmestamp se transforme al tipo datetime."""
     raw_df = create_raw_dataset()
-    
-    # 2. Ejecutamos la función de limpieza
     processed_df = clean_and_normalize(raw_df)
     
-    # 3. Verificamos processed_timestamp sea una fecha válida
-    
-    # Revisamos que la columna tenga el formato de fecha (datetime) correcto
     assert processed_df["processed_timestamp"].dtype == "datetime64[ns]"

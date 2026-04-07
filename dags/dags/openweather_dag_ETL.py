@@ -10,8 +10,8 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1, # Si falla, Airflow lo intentará una vez más automáticamente
-    'retry_delay': timedelta(minutes=5), # Espera de 5 minutos antes del reintento
+    'retries': 1, 
+    'retry_delay': timedelta(minutes=5), 
 }
 
 # 2. DAG
