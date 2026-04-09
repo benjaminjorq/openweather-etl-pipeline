@@ -8,9 +8,9 @@
 
 ##  Sobre el Proyecto
 
-Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather (Current Weather Data & Air Pollution), procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
+Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado, diseñado para extraer datos climáticos y de contaminación del aire (PM2.5, PM10, CO, NO2, O3, AQI) desde la API de OpenWeather (Current Weather Data & Air Pollution), con el objetivo de procesar la información y estudiar el estado de calidad del aire en ciudades de interés en Chile y/o Sudamérica.
 
-El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
+El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando la calidad de los datos, la trazabilidad y el manejo de escenarios reales de integración de datos (*error-handling*).
 
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
@@ -18,17 +18,36 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ---
 
-## Contexto y Alcance del Proyecto (Business Case & Scope)
+## Pipeline Flow
 
-Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta de una API, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
+<div align="center">
 
-Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
-
-**El objetivo de este pipeline es:**
-1. **Automatizar** la extracción diaria de datos para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
-   * *Tech note:* La selección de ciudades se desacopló del código mediante un archivo `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita.
-2. **Estandarizar y limpiar** la información en un repositorio centralizado.
-3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
+```text
+OpenWeather API Extraction
+(Weather and Air Pollution Data Collection)
+          ↓
+Apache Airflow Orchestration
+(Scheduled Batch Execution and Idempotent Workflow Automation)
+          ↓
+Data Ingestion & Bronze Layer
+(Data Extraction and Raw JSON Storage)
+          ↓
+Silver Processing Layer
+(Data Cleaning, Transformation and Pytest Validation)
+          ↓
+Structured Data Storage
+(Partitioned CSV Files (Hive) and PostgreSQL Upsert)
+          ↓
+Dimensional Modeling
+(Star Schema with Fact and Dimension Tables)
+          ↓
+Gold Analytics Layer
+(Business Aggregations and Reporting Tables)
+          ↓
+BI Consumption Layer
+(Analytical Visualizations and Geospatial Insights)
+```
+</div>
 
 ---
 
@@ -73,6 +92,10 @@ El pipeline controla duplicados en la capa Silver mediante `drop_duplicates`, si
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
 
 Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load >> Report`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
+
+**5. ¿Como se gestionan las ubicaciones a procesar?**
+
+La selección de ciudades se desacopló del código mediante un archivo de configuración `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita (*60 peticiones/minuto*).
 
 ---
 
