@@ -206,6 +206,20 @@ LIMIT 10;
 
 ---
 
+## Visualización
+
+Como etapa final de validación del pipeline, los datos consolidados en la capa Gold fueron utilizados en visualizaciones analíticas para verificar la calidad, consistencia y coherencia de las métricas generadas tras el proceso ETL.
+
+<div align="center">
+  <img 
+    width="100%" 
+    alt="Ranking de ciudades por PM2.5 en Chile" 
+    src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
+  />
+</div>
+
+---
+
 ## Tech Stack & Librerías
 
 El proyecto utiliza herramientas estándar de la industria, definidas en `requirements.txt`:
