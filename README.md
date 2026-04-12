@@ -18,16 +18,16 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ---
 
-## Pipeline Flow
+## Diagrama de Flujo del Pipeline
 
 <div align="center">
 
 ```text
-OpenWeather API Extraction
-(Weather and Air Pollution Data Collection)
-          ↓
 Apache Airflow Orchestration
 (Scheduled Batch Execution and Idempotent Workflow Automation)
+          ↓
+OpenWeather API Extraction
+(Weather and Air Pollution Data Collection)
           ↓
 Data Ingestion & Bronze Layer
 (Data Extraction and Raw JSON Storage)
@@ -36,13 +36,13 @@ Silver Processing Layer
 (Data Cleaning, Transformation and Pytest Validation)
           ↓
 Structured Data Storage
-(Partitioned CSV Files (Hive) and PostgreSQL Upsert)
+(Partitioned CSV Files in Hive-style format)
           ↓
-Dimensional Modeling
-(Star Schema with Fact and Dimension Tables)
+Dimensional Modeling & Data Warehouse
+(PostgreSQL Upsert to Star Schema: Fact and Dimension Tables)
           ↓
 Gold Analytics Layer
-(Business Aggregations and Reporting Tables)
+(Business Aggregations, Rankings, and Reporting Tables)
           ↓
 BI Consumption Layer
 (Analytical Visualizations and Geospatial Insights)
@@ -87,7 +87,7 @@ Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un 
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
 
-El pipeline controla duplicados en la capa Silver mediante `drop_duplicates`, sin embargo para reforzar la idempotencia se aplicó una restricción en la base de datos mediante una `PRIMARY KEY` compuesta (city, processed_timestamp) en PostgreSQL, evitando la inserción de registros duplicados ante re-ejecuciones del pipeline.
+La idempotencia se asegura mediante un enfoque por capas: en Bronze, los datos se almacenan de forma inmutable para garantizar trazabilidad; en Silver, se eliminan duplicados con drop_duplicates; y en la etapa de carga se refuerza mediante una PRIMARY KEY compuesta (city, processed_timestamp) en PostgreSQL, utilizando ON CONFLICT DO NOTHING. Esto evita duplicaciones y asegura consistencia ante re-ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
 
