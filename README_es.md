@@ -324,36 +324,28 @@ El sistema genera logs detallados en cada etapa para facilitar el monitoreo y as
 
 <details>
 <summary><b>1. Ingesta de Datos (Bronze Layer)</b></summary>
-  
 Evidencia de la extracción batch desde la API de OpenWeather y el almacenamiento exitoso de los datos crudos en formato JSON.
-
 <br><br>
 <img width="909" alt="log ingesta" src="https://github.com/user-attachments/assets/270fd292-4366-48b1-a6f6-447ad490480d" />
 </details>
 
 <details>
 <summary><b>2. Transformación y Limpieza (Silver Layer)</b></summary>
-  
 Logs del proceso de limpieza, normalización de esquemas y aplanamiento de estructuras anidadas mediante Pandas.
-
 <br><br>
 <img width="960" alt="log transform" src="https://github.com/user-attachments/assets/996f31d5-1670-4295-bae3-c1c9cdf1b99b" />
 </details>
 
 <details>
 <summary><b>3. Carga a PostgreSQL</b></summary>
-  
 Confirmación de la ingesta de datos limpios hacia la base de datos relacional PostgreSQL para persistencia a largo plazo.
-
 <br><br>
 <img width="827" alt="log load" src="https://github.com/user-attachments/assets/8fad41f9-e2f4-4204-9892-58e350c9cbe5" />
 </details>
 
 <details>
 <summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
-  
 Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
-
 <br><br>
 <img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
 </details>
