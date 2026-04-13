@@ -345,10 +345,9 @@ Confirmación de la ingesta de datos limpios hacia la base de datos relacional P
 
 <details>
 <summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
-  <img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
-  
 Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
 <br><br>
+<img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
 </details>
 
 ---
