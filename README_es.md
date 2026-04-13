@@ -222,7 +222,6 @@ WITH reporte_clima AS (
     FROM dwh.fact_weather_metrics
     GROUP BY location_id
 )
-
 SELECT 
     l.city AS ciudad,
     l.country AS pais,
@@ -235,7 +234,6 @@ FROM dwh.dim_location AS l
 JOIN reporte_clima AS rc
 ON l.location_id = rc.location_id
 ORDER BY rc.temperatura_c DESC
-
 LIMIT 10;
 
 ```
@@ -332,16 +330,14 @@ pytests\test_transform.py ...                                            [100%]
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
 
 <details>
-
 <summary><b>1. Ingesta de Datos (Bronze Layer)</b></summary>
-
+  
 Evidencia de la extracción batch desde la API de OpenWeather y el almacenamiento exitoso de los datos crudos en formato JSON.
-
+  
 <br><br>
-
 <img width="909" alt="log ingesta" src="https://github.com/user-attachments/assets/270fd292-4366-48b1-a6f6-447ad490480d" />
-
 </details>
+
 <details>
 
 <summary><b>2. Transformación y Limpieza (Silver Layer)</b></summary>
@@ -349,10 +345,9 @@ Evidencia de la extracción batch desde la API de OpenWeather y el almacenamient
 Logs del proceso de limpieza, normalización de esquemas y aplanamiento de estructuras anidadas mediante Pandas.
 
 <br><br>
-
 <img width="960" alt="log transform" src="https://github.com/user-attachments/assets/996f31d5-1670-4295-bae3-c1c9cdf1b99b" />
-
 </details>
+
 <details>
 
 <summary><b>3. Carga a PostgreSQL</b></summary>
@@ -360,10 +355,9 @@ Logs del proceso de limpieza, normalización de esquemas y aplanamiento de estru
 Confirmación de la ingesta de datos limpios hacia la base de datos relacional PostgreSQL para persistencia a largo plazo.
 
 <br><br>
-
 <img width="827" alt="log load" src="https://github.com/user-attachments/assets/8fad41f9-e2f4-4204-9892-58e350c9cbe5" />
-
 </details>
+
 <details>
 
 <summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
@@ -439,7 +433,7 @@ openweather-etl-pipeline/
 ```
 ---
 
-## Roadmap (Trabajo Futuro)
+## 🚀 Mejoras Futuras (Roadmap)
 
 Estas mejoras reflejan una evolución natural desde un entorno local hacia un pipeline más cercano a producción, priorizando escalabilidad, observabilidad y calidad de datos.
 
