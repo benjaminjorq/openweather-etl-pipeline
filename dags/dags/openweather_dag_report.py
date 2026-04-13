@@ -14,7 +14,6 @@ with DAG(
     dag_id='openweather_daily_report',
     default_args=default_args,
     description='Genera el reporte y ranking diario de la capa Gold',
-    # Cron expression: minuto 50, hora 23, todos los dias, meses y años
     schedule_interval='50 23 * * *', 
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"),
     catchup=False,
