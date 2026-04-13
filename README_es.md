@@ -6,11 +6,15 @@
 ![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-150458?style=for-the-badge&logo=pandas&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Apache%20Airflow-Orchestration-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
 
+
+
 ##  Sobre el Proyecto
 
-Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado. Su objetivo es extraer datos climáticos y de contaminación desde la API de OpenWeather (Current Weather Data & Air Pollution), procesarlos para asegurar su calidad y disponibilidad, y generar reportes analíticos.
+Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado, que automatiza la extracción de datos climáticos y de contaminación del aire (PM2.5, PM10, CO, NO2, O3, AQI) desde la API de OpenWeather (Current Weather Data & Air Pollution), con el objetivo de procesar la información y estudiar el estado de calidad del aire en ciudades de interés de Chile y/o Sudamérica.
 
-El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando el manejo de errores, la limpieza de datos y la trazabilidad mediante logs.
+El pipeline está diseñado bajo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando la calidad de los datos, idempotencia, la trazabilidad y el manejo de escenarios reales de integración de datos (*error-handling*).
+
+Como resultado, el sistema genera datasets limpios y estructurados, junto a métricas agregadas y rankings de contaminación listos para consumo analítico en herramientas de BI.
 
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
@@ -18,17 +22,42 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ---
 
-## Contexto y Alcance del Proyecto (Business Case & Scope)
+## Diagrama ETL
 
-Este pipeline se diseñó con un doble propósito: resolver un problema analítico a través de un proceso ETL (ingesta de una API, normalización de datos anidados y carga de la información en bases de datos relacional) y servir como una implementación práctica para estudiar fundamentos sólidos de Ingeniería de Datos.
+<div align="center">
 
-Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline prioriza la modularidad, la trazabilidad y el manejo de escenarios reales de integración de datos.
+```text
+Apache Airflow Orchestration
+(Scheduled Batch Execution and Idempotent Workflow Automation)
+          ↓
+OpenWeather API Extraction
+(Weather and Air Pollution Data Collection)
 
-**El objetivo de este pipeline es:**
-1. **Automatizar** la extracción diaria de datos para 25 ciudades (Chile y Sudamérica) y estudiar los niveles de contaminación del Aire (PM2.5, PM10, CO, NO2, O3, AQI).
-   * *Tech note:* La selección de ciudades se desacopló del código mediante un archivo `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita.
-2. **Estandarizar y limpiar** la información en un repositorio centralizado.
-3. **Generar valor inmediato** automatizando reportes (Ranking de ciudades más contaminadas y resúmenes) listos para ser consumidos por herramientas de BI.
+          ↓
+Data Ingestion & Bronze Layer
+(Data Extraction and Raw JSON Storage)
+
+          ↓
+Silver Processing Layer
+(Data Cleaning, Transformation and Pytest Validation)
+
+          ↓
+Structured Data Storage
+(Partitioned CSV Files in Hive-style format)
+          ↓
+Dimensional Modeling & Data Warehouse
+(PostgreSQL Upsert to Star Schema: Fact and Dimension Tables)
+
+          ↓
+Gold Analytics Layer
+(Business Aggregations, Rankings, and Reporting Tables)
+
+          ↓
+BI Consumption Layer
+(Analytical Visualizations and Geospatial Insights)
+
+```
+</div>
 
 ---
 
@@ -37,14 +66,16 @@ Más que buscar el procesamiento de grandes volúmenes, el diseño del pipeline 
 El flujo está diseñado para transformar datos crudos en insights de negocio:
 
 ### 1. Bronze Layer (Ingesta Raw)
+
 * **Fuente:** API OpenWeather (Endpoints `/weather` y `/air_pollution`).
 * **Proceso:** Extracción vía `requests` validando códigos de estado HTTP (200 OK).
 * **Almacenamiento:** Archivos JSON crudos guardados localmente para auditoría histórica.
 
 ### 2. Silver Layer (Limpieza y Normalización)
+
 * **Transformación:**
     * **Flattening:** Aplanamiento de estructuras JSON anidadas (diccionarios dentro de listas) usando Python y Pandas.
-    * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
+    * **Calidad de datos:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
 * **Almacenamiento:** Archivos **CSV** con particionamiento tipo Hive (`year=YYYY/month=MM/day=DD`) para optimizar la organización y consulta.
 * **Carga DB:** Ingesta de datos limpios hacia **PostgreSQL** mediante `SQLAlchemy`.
 
@@ -63,16 +94,16 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 Se eligió la arquitectura Medallion para estructurar el pipeline en capas con responsabilidades claramente definidas: almacenamiento de datos sin procesar (Bronze), limpieza y validación de calidad (Silver), y transformaciones orientadas a negocio (Gold), con el objetivo de que los reportes finales consuman siempre datos confiables y coherentes.
 
 **2. ¿Por qué utilizar CSV en la capa Silver en lugar de Parquet?**
-
-Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet seria preferible por compresión y mejor performance de lectura (sistemas distribuidos).
+Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet sería preferible por compresión y mejor performance de lectura (sistemas distribuidos).
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
-
-El pipeline controla duplicados en la capa Silver mediante `drop_duplicates`, sin embargo para reforzar la idempotencia se aplicó una restricción en la base de datos mediante una `PRIMARY KEY` compuesta (city, processed_timestamp) en PostgreSQL, evitando la inserción de registros duplicados ante re-ejecuciones del pipeline.
+La idempotencia se asegura mediante un enfoque por capas: en Bronze, los datos se almacenan de forma inmutable para garantizar trazabilidad; en Silver, se eliminan duplicados con `drop_duplicates`; y en la etapa de carga se refuerza mediante una PRIMARY KEY compuesta `(city, processed_timestamp)` en PostgreSQL, utilizando ON CONFLICT DO NOTHING. Esto evita duplicaciones y asegura consistencia ante re-ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
-
 Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load >> Report`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
+
+**5. ¿Cómo se gestionan las ubicaciones a procesar?**
+La selección de ciudades se desacopló del código mediante un archivo de configuración `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita (*60 peticiones/minuto*).
 
 ---
 
@@ -92,6 +123,7 @@ Esta arquitectura separa lo descriptivo de las métricas cuantitativas, garantiz
 ### Estructura del Modelo Estrella
 
 * **Dimensiones (Contexto):**
+
   * `dim_location`: Entidad geográfica única (`city`, `country`).
   * `dim_time`: Dimensión de tiempo granular para análisis.
   * `dim_weather_condition`: Catálogo de condiciones climáticas.
@@ -107,7 +139,6 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
   <br>
   <em>Vista de la tabla de hechos: métricas y llaves foráneas.</em>
 </div>
-
 <img width="1876" height="417" alt="image" src="https://github.com/user-attachments/assets/82c852c3-df46-4376-b971-b3777bdf013c" />
 
 
@@ -116,6 +147,7 @@ Como resultado del modelado, la tabla central almacena las llaves foráneas que 
 El diseño relacional del Data Warehouse permite responder preguntas de negocio uniendo las tablas de hechos y dimensiones. A continuación, algunas consultas analíticas ejecutadas directamente en PostgreSQL:
 
 <details>
+  
 <summary><b>Consulta 1 SQL: Top 5 Ciudades más Contaminadas (Clasificación de Riesgo según Promedios de PM2.5)</b></summary>
 
 *Identifica las ciudades con los niveles promedio más críticos de partículas finas (PM2.5).
@@ -135,17 +167,20 @@ JOIN dwh.dim_location AS l
 ON f.location_id = l.location_id
 GROUP BY l.city, l.country
 ORDER BY pm2_5_promedio DESC
+
 LIMIT 5;
+
 ```
+
 <img width="647" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/00a6cb26-91fa-4a06-a79d-5bdd64b7bcea" />
 
 </details>
-
 <details>
+
 <summary><b>Consulta 2 SQL: Top 10 Ciudades con Aire más Limpio en Chile </b></summary>
 
 *Identifica las 10 ciudades de Chile con los niveles más bajos de partículas suspendidas (PM10) y emisiones vehiculares (CO), generando un ranking nacional de limpieza junto a su temperatura promedio.
-  
+
 ```sql
 SELECT 
     l.city AS ciudad,
@@ -163,17 +198,18 @@ ON f.aqi_id = a.aqi_id
 WHERE l.country = 'CL'
 GROUP BY l.city, l.country
 ORDER BY pm10_promedio ASC
+
 LIMIT 10;
+
 ```
 <img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
-
 </details>
-
 <details>
+
 <summary><b>Consulta 3 SQL: Estado Térmico Actual por Ciudad (Simulación) </b></summary>
 
 *Analiza el confort térmico y las variables del entorno por ciudad, verifica datos de sensación térmica, humedad y velocidad del viento en zonas de interés.
-  
+
 ```sql
 WITH reporte_clima AS (
     SELECT 
@@ -186,6 +222,7 @@ WITH reporte_clima AS (
     FROM dwh.fact_weather_metrics
     GROUP BY location_id
 )
+
 SELECT 
     l.city AS ciudad,
     l.country AS pais,
@@ -198,11 +235,26 @@ FROM dwh.dim_location AS l
 JOIN reporte_clima AS rc
 ON l.location_id = rc.location_id
 ORDER BY rc.temperatura_c DESC
+
 LIMIT 10;
+
 ```
 <img width="1076" height="401" alt="sql3" src="https://github.com/user-attachments/assets/20590d53-ede3-4535-a92f-e24d235bc55f" />
-
 </details>
+
+---
+
+## Visualización
+
+Como etapa final de validación del pipeline, los datos consolidados en la capa Gold fueron utilizados en visualizaciones analíticas para verificar la calidad, consistencia y coherencia de las métricas generadas tras el proceso ETL.
+
+<div align="center">
+  <img 
+    width="100%" 
+    alt="Ranking de ciudades por PM2.5 en Chile" 
+    src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
+  />
+</div>
 
 ---
 
@@ -222,7 +274,8 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
 ### 1. Pipeline ETL Principal (Ejecución Horaria)
-Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs.. 13:00 Hrs..)
+
+Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs, 13:00 Hrs, etc.)
 
 <p align="center">
   <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
@@ -231,6 +284,7 @@ Este flujo se encarga de la extracción, transformación y carga en base de dato
 </p>
 
 ### 2. Generación de Reportes Gold (Ejecución Diaria)
+
 Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de datos recopilados durante el dia, calcular los promedios numéricos y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
 
 <p align="center">
@@ -246,60 +300,79 @@ Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 
 En este proyecto se implementó un conjunto de pruebas automatizadas utilizando **Pytest** para estudiar y garantizar la integridad, consistencia y calidad de los datos antes de su inserción en PostgreSQL. Para lograrlo, se diseñó un entorno que inyecta un *dataset* simulado con errores comunes (espacios extra, valores nulos, inconsistencia de mayúsculas y tipos de datos mixtos) directamente en la función de transformación de la capa Silver (`clean_and_normalize`). Esto asegura que los datos cumplan con los formatos requeridos.
 
 ### Casos de Prueba Cubiertos
+
 * **Limpieza de Cadenas (`test_string_cleaning`):** Verifica la eliminación de espacios en blanco (`strip`), la corrección de capitalización en descripciones y el manejo seguro de valores nulos.
 * **Conversión Numérica (`test_numeric_casting`):** Valida que las métricas extraídas de la API (temperatura, humedad, velocidad del viento) se conviertan correctamente a tipos numéricos manipulables.
 * **Manejo de Fechas (`test_date_conversion`):** Asegura que la columna de tiempo se formatee estrictamente al estándar temporal de Pandas (`datetime64[ns]`).
 
 ### Ejecución de las Pruebas
+
 Para correr las pruebas localmente y verificar la lógica de transformación, ejecuta el siguiente comando desde la raíz del proyecto:
 
 ```bash
 python -m pytest pytests/test_transform.py
 ```
+
 ```text
+
 ============================= test session starts =============================
 platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
 rootdir: C:\Users\Benjamin\airwatch
 configfile: pytest.ini
 plugins: anyio-4.12.0
 collected 3 items
-
 pytests\test_transform.py ...                                            [100%]
-
 ============================== 3 passed in 1.94s ==============================
+
 ```
 ---
+
 ### Monitoreo y Logs
 
 El sistema genera logs detallados en cada etapa para facilitar el monitoreo y asegurar la calidad de los datos. Puedes expandir cada sección para ver la evidencia técnica:
 
 <details>
+
 <summary><b>1. Ingesta de Datos (Bronze Layer)</b></summary>
+
 Evidencia de la extracción batch desde la API de OpenWeather y el almacenamiento exitoso de los datos crudos en formato JSON.
+
 <br><br>
+
 <img width="909" alt="log ingesta" src="https://github.com/user-attachments/assets/270fd292-4366-48b1-a6f6-447ad490480d" />
-</details>
 
+</details>
 <details>
+
 <summary><b>2. Transformación y Limpieza (Silver Layer)</b></summary>
+
 Logs del proceso de limpieza, normalización de esquemas y aplanamiento de estructuras anidadas mediante Pandas.
+
 <br><br>
+
 <img width="960" alt="log transform" src="https://github.com/user-attachments/assets/996f31d5-1670-4295-bae3-c1c9cdf1b99b" />
-</details>
 
+</details>
 <details>
+
 <summary><b>3. Carga a PostgreSQL</b></summary>
+
 Confirmación de la ingesta de datos limpios hacia la base de datos relacional PostgreSQL para persistencia a largo plazo.
+
 <br><br>
+
 <img width="827" alt="log load" src="https://github.com/user-attachments/assets/8fad41f9-e2f4-4204-9892-58e350c9cbe5" />
+
 </details>
-
 <details>
-<summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
-  <img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
-Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
-<br><br>
 
+<summary><b>4. Generación de Reportes (Gold Layer)</b></summary>
+
+  <img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
+
+Evidencia de la lógica de negocio aplicada: creación de rankings de contaminación y resúmenes estadísticos con niveles de calidad de aire.
+
+<br><br>
 </details>
 
 ---
@@ -307,29 +380,35 @@ Evidencia de la lógica de negocio aplicada: creación de rankings de contaminac
 ## Requerimientos
 
 Antes de comenzar, asegúrate de tener instalado:
+
 * [Docker Desktop](https://www.docker.com/products/docker-desktop)
 * Una API Key activa de [OpenWeatherMap](https://openweathermap.org/api)
 
 ## Configuración e Instalación
 
 1.  **Clonar el repositorio:**
+
     ```bash
     git clone https://github.com/benjaminjorq/openweather-etl-pipeline.git
     cd openweather-etl-pipeline
     ```
 
 2.  **Configurar variables de entorno:**
+
     Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales (puedes usar el archivo `.env.example` como guía):
     ```env
     AIRFLOW_UID=50000
     OPENWEATHER_API_KEY=tu_api_key_aqui
     POSTGRES_USER=airflow
-    POSTGRES_PASSWORD=tu_password
+    POSTGRES_PASSWORD=airflow
     POSTGRES_DB=weather_db
+
     ```
 
 3.  **Iniciar los servicios:**
+
     Ejecuta el siguiente comando para levantar Airflow y PostgreSQL:
+    
     ```bash
     docker-compose up -d
     ```
@@ -356,5 +435,21 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Configuración Docker
+
+```
+---
+
+## Roadmap (Trabajo Futuro)
+
+Estas mejoras reflejan una evolución natural desde un entorno local hacia un pipeline más cercano a producción, priorizando escalabilidad, observabilidad y calidad de datos.
+
+- **Observabilidad:** Implementación de alertas ante fallos (Slack/Email) en Apache Airflow.
+- **Data Contracts:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
+- **Testing Avanzado:** Incorporación de fixtures en Pytest para mejorar cobertura y aislar escenarios de prueba.
+- **Optimización de Almacenamiento:** Migración de la capa Silver desde CSV a formato columnar (Parquet) para mejorar performance y eficiencia.
+- **Escalabilidad:** Despliegue en entornos cloud (AWS/GCP) y adaptación a procesamiento distribuido con Apache Spark.
+
+
+
 
 
