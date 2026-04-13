@@ -167,7 +167,7 @@ ORDER BY avg_pm2_5 DESC
 LIMIT 5;
 ```
 
-<img width="647" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/00a6cb26-91fa-4a06-a79d-5bdd64b7bcea" />
+<img width="647" height="188" alt="sql 1" src=<img width="609" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/58303240-0d90-418c-a8ad-b7959cf1c265" />
 
 </details>
 <details>
@@ -196,7 +196,8 @@ ORDER BY avg_pm10 ASC
 LIMIT 10;
 ```
 
-<img width="1188" height="327" alt="sql2" src="https://github.com/user-attachments/assets/2298e3a8-29a6-4d70-b982-ab4416e7152d" />
+<img width="1188" height="327" alt="sql2" src=<img width="1050" height="369" alt="sql 2" src="https://github.com/user-attachments/assets/22a7a162-ef83-43d4-9ef5-f485168e2dfb" />
+
 </details>
 <details>
 
@@ -231,7 +232,8 @@ ORDER BY rc.temperature_c DESC
 LIMIT 10;
 ```
 
-<img width="1076" height="401" alt="sql3" src="https://github.com/user-attachments/assets/20590d53-ede3-4535-a92f-e24d235bc55f" />
+<img width="1076" height="401" alt="sql3" src=<img width="979" height="331" alt="sql 3" src="https://github.com/user-attachments/assets/603ec8a1-c883-4df9-81e0-4611f85f05bf" />
+
 </details>
 
 ---
@@ -244,8 +246,8 @@ As a final pipeline validation stage, the data consolidated in the Gold layer wa
   <img 
     width="100%" 
     alt="City ranking by PM2.5 in Chile" 
-    src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
-  />
+    src=<img width="1536" height="1024" alt="english graph" src="https://github.com/user-attachments/assets/5a8ddc13-543d-470a-9486-964bf362698b" />
+  
 </div>
 
 ---
@@ -325,29 +327,93 @@ The system generates detailed logs at each stage to facilitate monitoring and en
 <details>
 <summary><b>1. Data Ingestion (Bronze Layer)</b></summary>
 Evidence of batch extraction from the OpenWeather API and successful storage of raw data in JSON format.
-<br><br>
-<img width="909" alt="log ingesta" src="https://github.com/user-attachments/assets/270fd292-4366-48b1-a6f6-447ad490480d" />
+```text
+[2026-01-20, 16:41:24 -03] INFO - Output:
+[2026-01-20, 16:41:24 -03] INFO - Starting ingestion process
+[2026-01-20, 16:41:24 -03] INFO - Downloading data for city: Arica
+[2026-01-20, 16:41:25 -03] INFO - Downloading data for city: Iquique
+[2026-01-20, 16:41:26 -03] INFO - Downloading data for city: Antofagasta
+[2026-01-20, 16:41:27 -03] INFO - Downloading data for city: Calama
+[2026-01-20, 16:41:28 -03] INFO - Downloading data for city: La Serena
+[2026-01-20, 16:41:30 -03] INFO - Downloading data for city: Valparaiso
+[2026-01-20, 16:41:31 -03] INFO - Downloading data for city: Santiago
+[2026-01-20, 16:41:32 -03] INFO - Downloading data for city: Rancagua
+[2026-01-20, 16:41:33 -03] INFO - Downloading data for city: Talca
+[2026-01-20, 16:41:34 -03] INFO - Downloading data for city: Chillan
+[2026-01-20, 16:41:36 -03] INFO - Downloading data for city: Concepcion
+[2026-01-20, 16:41:37 -03] INFO - Downloading data for city: Temuco
+[2026-01-20, 16:41:38 -03] INFO - Downloading data for city: Valdivia
+[2026-01-20, 16:41:40 -03] INFO - Downloading data for city: Puerto Montt
+[2026-01-20, 16:41:41 -03] INFO - Downloading data for city: Punta Arenas
+[2026-01-20, 16:41:41 -03] INFO - Downloading data for city: Buenos Aires
+[2026-01-20, 16:41:42 -03] INFO - Downloading data for city: Lima
+[2026-01-20, 16:41:43 -03] INFO - Downloading data for city: Bogota
+[2026-01-20, 16:41:43 -03] INFO - Downloading data for city: Sao Paulo
+[2026-01-20, 16:41:45 -03] INFO - Downloading data for city: Rio de Janeiro
+[2026-01-20, 16:41:46 -03] INFO - Downloading data for city: Montevideo
+[2026-01-20, 16:41:47 -03] INFO - Downloading data for city: La Paz
+[2026-01-20, 16:41:48 -03] INFO - Downloading data for city: Quito
+[2026-01-20, 16:41:49 -03] INFO - Downloading data for city: Asuncion
+[2026-01-20, 16:41:50 -03] INFO - Downloading data for city: Caracas
+[2026-01-20, 16:41:50 -03] INFO - File successfully saved: raw_weather_data_2026_01_20_194150.json
+```
 </details>
 
 <details>
 <summary><b>2. Transformation and Cleaning (Silver Layer)</b></summary>
 Logs from the cleaning, schema normalization, and flattening of nested structures via Pandas.
-<br><br>
-<img width="960" alt="log transform" src="https://github.com/user-attachments/assets/996f31d5-1670-4295-bae3-c1c9cdf1b99b" />
+```text
+[2026-01-20, 16:41:51 -03] INFO - Starting transformation process
+[2026-01-20, 16:41:51 -03] INFO - Processing file: raw_weather_data_2026_01_20_194150.json
+[2026-01-20, 16:41:51 -03] INFO - Transformation completed. CSV saved: clean_weather_data_19_41_51.csv
+```
 </details>
 
 <details>
 <summary><b>3. Load to PostgreSQL</b></summary>
 Confirmation of clean data ingestion into the PostgreSQL relational database for long-term persistence.
-<br><br>
-<img width="827" alt="log load" src="https://github.com/user-attachments/assets/8fad41f9-e2f4-4204-9892-58e350c9cbe5" />
+```text
+[2026-01-20, 16:41:51 -03] INFO - Starting transformation process
+[2026-01-20, 16:41:51 -03] INFO - Processing file: raw_weather_data_2026_01_20_194150.json
+[2026-01-20, 16:41:51 -03] INFO - Transformation completed. CSV saved: clean_weather_data_19_41_51.csv
+```
 </details>
 
 <details>
 <summary><b>4. Report Generation (Gold Layer)</b></summary>
 Evidence of applied business logic: creation of pollution rankings and statistical summaries with air quality levels.
-<br><br>
-<img width="857" height="453" alt="log gold" src="https://github.com/user-attachments/assets/5f32409c-6720-480f-8aa4-a5f5745329f6" />
+```text
+[2026-03-11, 20:42:44 UTC] INFO - Report generation started
+[2026-03-11, 20:42:44 UTC] INFO - Successful consolidation. Total records: 25
+[2026-03-11, 20:42:44 UTC] INFO - Unique records after daily aggregation: 25
+
+[INFO] Top 7 Pollution Ranking (Preview):
+
+City        Temp  Humidity  Wind  Pressure  AQI  PM2.5  PM10  CO    NO2   O3    Status
+Antofagasta 22.6  80.0      3.1   1013.0    2.0  13.2   23.7  60.8  0.1   51.6  Good
+Calama      23.3  15.0      7.7   1012.0    2.0  13.2   44.1  67.9  0.3   79.0  Good
+Santiago    29.4  34.0      6.2   1013.0    2.0  8.3    11.4  85.6  0.8   70.8  Good
+Rancagua    29.2  27.0      4.3   1012.0    2.0  7.2    9.4   94.1  0.8   72.1  Good
+Caracas     22.6  74.0      1.5   1013.0    2.0  4.2    5.8   128.4 1.2   67.8  Good
+Iquique     22.5  78.0      1.8   1013.0    1.0  9.0    17.6  63.4  0.1   47.4  Excellent
+Bogota      18.2  65.0      5.8   1012.0    1.0  8.0    8.2   171.4 0.7   46.0  Excellent
+
+[INFO] File saved: ranking_pollution_2026_03_11.csv
+[INFO] Country Summary (Preview):
+
+Country Temp Humidity Wind Pressure AQI PM2.5 PM10 CO   NO2  O3   Status
+PE      22.6 74.0     1.5  1013.0   2.0 4.2   5.8  128.4 1.2 67.8 Good
+CL      23.2 53.2     4.7  1012.8   1.3 5.3   11.2 68.7  0.4 48.6 Excellent
+AR      24.5 61.0     8.8  1015.0   1.0 1.8   3.7  64.0  0.4 51.3 Excellent
+BO      15.0 56.0     3.1  1010.0   1.0 1.1   1.8  73.4  0.3 32.3 Excellent
+BR      22.2 93.0     3.8  1013.5   1.0 1.1   3.0  56.2  0.3 37.2 Excellent
+CO      18.2 65.0     5.8  1012.0   1.0 8.0   8.2  171.4 0.7 46.0 Excellent
+EC      12.6 82.0     2.6  1015.0   1.0 4.2   4.2  178.0 4.8 48.2 Excellent
+PY      30.9 62.0     8.2  1007.0   1.0 5.5   5.8  122.5 1.2 35.0 Excellent
+UY      22.5 86.0     7.7  1016.0   1.0 2.6   5.8  0.0   35.6 Excellent
+
+[INFO] File saved: summary_country_2026_03_11.csv
+```
 </details>
 
 ---
