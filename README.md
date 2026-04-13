@@ -167,9 +167,10 @@ ORDER BY avg_pm2_5 DESC
 LIMIT 5;
 ```
 
-<img width="647" height="188" alt="sql 1" src=<img width="609" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/58303240-0d90-418c-a8ad-b7959cf1c265" />
+<img width="609" height="188" alt="sql 1" src="https://github.com/user-attachments/assets/58303240-0d90-418c-a8ad-b7959cf1c265" />
 
 </details>
+
 <details>
 
 <summary><b>SQL Query 2: Top 10 Cities with Cleanest Air in Chile</b></summary>
@@ -196,9 +197,10 @@ ORDER BY avg_pm10 ASC
 LIMIT 10;
 ```
 
-<img width="1188" height="327" alt="sql2" src=<img width="1050" height="369" alt="sql 2" src="https://github.com/user-attachments/assets/22a7a162-ef83-43d4-9ef5-f485168e2dfb" />
+<img width="1050" height="369" alt="sql 2" src="https://github.com/user-attachments/assets/22a7a162-ef83-43d4-9ef5-f485168e2dfb" />
 
 </details>
+
 <details>
 
 <summary><b>SQL Query 3: Current Thermal Status by City (Simulation)</b></summary>
@@ -232,7 +234,7 @@ ORDER BY rc.temperature_c DESC
 LIMIT 10;
 ```
 
-<img width="1076" height="401" alt="sql3" src=<img width="979" height="331" alt="sql 3" src="https://github.com/user-attachments/assets/603ec8a1-c883-4df9-81e0-4611f85f05bf" />
+<img width="979" height="331" alt="sql 3" src="https://github.com/user-attachments/assets/603ec8a1-c883-4df9-81e0-4611f85f05bf" />
 
 </details>
 
