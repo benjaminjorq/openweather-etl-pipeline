@@ -261,7 +261,7 @@ El proyecto utiliza herramientas estándar de la industria, definidas en `requir
 La automatización y el control del flujo de datos se gestionan con Apache Airflow. Su implementación permite coordinar las dependencias entre tareas, gestionar reintentos automáticos y mantener un registro claro (logs) de cada ejecución para asegurar la calidad del dato.
 
 ### 1. Pipeline ETL Principal (Ejecución Horaria)
-Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs.. 13:00 Hrs..)
+Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs, 13:00 Hrs, etc.)
 
 <p align="center">
   <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
@@ -395,6 +395,7 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Configuración Docker
+```
 
 ---
 
