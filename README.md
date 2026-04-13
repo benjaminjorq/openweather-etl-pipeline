@@ -1,6 +1,6 @@
 # ☀️ OpenWeather ETL Pipeline
 
-*🌍 Read this in other languages: [English](README.md) | [Español](README_es.md)*
+*🌍 Read this in other languages: [English](README.md) | [Spanish](README_es.md)*
 
 ---
 
