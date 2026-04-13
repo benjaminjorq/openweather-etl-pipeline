@@ -8,9 +8,11 @@
 
 ##  Sobre el Proyecto
 
-Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado, diseñado para extraer datos climáticos y de contaminación del aire (PM2.5, PM10, CO, NO2, O3, AQI) desde la API de OpenWeather (Current Weather Data & Air Pollution), con el objetivo de procesar la información y estudiar el estado de calidad del aire en ciudades de interés en Chile y/o Sudamérica.
+Este proyecto implementa un pipeline de datos batch **End-to-End** modularizado y contenerizado, que automatiza la extracción de datos climáticos y de contaminación del aire (PM2.5, PM10, CO, NO2, O3, AQI) desde la API de OpenWeather (Current Weather Data & Air Pollution), con el objetivo de procesar la información y estudiar el estado de calidad del aire en ciudades de interés de Chile y/o Sudamérica.
 
-El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando la calidad de los datos, la trazabilidad y el manejo de escenarios reales de integración de datos (*error-handling*).
+El pipeline está diseñado bajo la arquitectura **Medallion (Bronze/Silver/Gold)**, priorizando la calidad de los datos, idempotencia, la trazabilidad y el manejo de escenarios reales de integración de datos (*error-handling*).
+
+Como resultado, el sistema genera datasets limpios y estructurados, junto a métricas agregadas y rankings de contaminación listos para consumo analítico en herramientas de BI.
 
 <div align="center">
   <img width="100%" alt="pipeline_diagram" src="https://github.com/user-attachments/assets/bcb2a51a-2000-43da-ae69-8c0f2ee6b0ce" />
@@ -18,7 +20,7 @@ El sistema simula un entorno productivo siguiendo la arquitectura **Medallion (B
 
 ---
 
-## Diagrama de Flujo del Pipeline
+## Diagrama ETL
 
 <div align="center">
 
@@ -63,7 +65,7 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 ### 2. Silver Layer (Limpieza y Normalización)
 * **Transformación:**
     * **Flattening:** Aplanamiento de estructuras JSON anidadas (diccionarios dentro de listas) usando Python y Pandas.
-    * **Data Quality:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
+    * **Calidad de datos:** Conversión de tipos de datos, eliminación de duplicados y filtrado de valores atípicos.
 * **Almacenamiento:** Archivos **CSV** con particionamiento tipo Hive (`year=YYYY/month=MM/day=DD`) para optimizar la organización y consulta.
 * **Carga DB:** Ingesta de datos limpios hacia **PostgreSQL** mediante `SQLAlchemy`.
 
@@ -83,17 +85,17 @@ Se eligió la arquitectura Medallion para estructurar el pipeline en capas con r
 
 **2. ¿Por qué utilizar CSV en la capa Silver en lugar de Parquet?**
 
-Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet seria preferible por compresión y mejor performance de lectura (sistemas distribuidos).
+Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet sería preferible por compresión y mejor performance de lectura (sistemas distribuidos).
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
 
-La idempotencia se asegura mediante un enfoque por capas: en Bronze, los datos se almacenan de forma inmutable para garantizar trazabilidad; en Silver, se eliminan duplicados con drop_duplicates; y en la etapa de carga se refuerza mediante una PRIMARY KEY compuesta (city, processed_timestamp) en PostgreSQL, utilizando ON CONFLICT DO NOTHING. Esto evita duplicaciones y asegura consistencia ante re-ejecuciones del pipeline.
+La idempotencia se asegura mediante un enfoque por capas: en Bronze, los datos se almacenan de forma inmutable para garantizar trazabilidad; en Silver, se eliminan duplicados con `drop_duplicates`; y en la etapa de carga se refuerza mediante una PRIMARY KEY compuesta `(city, processed_timestamp)` en PostgreSQL, utilizando ON CONFLICT DO NOTHING. Esto evita duplicaciones y asegura consistencia ante re-ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
 
 Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load >> Report`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
 
-**5. ¿Como se gestionan las ubicaciones a procesar?**
+**5. ¿Cómo se gestionan las ubicaciones a procesar?**
 
 La selección de ciudades se desacopló del código mediante un archivo de configuración `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita (*60 peticiones/minuto*).
 
@@ -393,5 +395,19 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Configuración Docker
+
+---
+
+## Roadmap (Trabajo Futuro)
+
+Estas mejoras reflejan una evolución natural desde un entorno local hacia un pipeline más cercano a producción, priorizando escalabilidad, observabilidad y calidad de datos.
+
+- **Observabilidad:** Implementación de alertas ante fallos (Slack/Email) en Apache Airflow.
+- **Data Contracts:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
+- **Testing Avanzado:** Incorporación de fixtures en Pytest para mejorar cobertura y aislar escenarios de prueba.
+- **Optimización de Almacenamiento:** Migración de la capa Silver desde CSV a formato columnar (Parquet) para mejorar performance y eficiencia.
+- **Escalabilidad:** Despliegue en entornos cloud (AWS/GCP) y adaptación a procesamiento distribuido con Apache Spark.
+
+
 
 
