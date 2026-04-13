@@ -1,5 +1,11 @@
 # ☀️ OpenWeather ETL Pipeline
 
+---
+
+*🌍 Leer en otros idiomas: [Inglés](README.md) | [Español](README_es.md)*
+
+---
+
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
