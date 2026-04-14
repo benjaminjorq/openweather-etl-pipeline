@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
-from airflow import DAG
-from airflow.operators.bash import BashOperator
 import pendulum
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from src.ingestion.openweather_batch_ingest import start_ingestion_process
+from src.transform.openweather_batch_transform import start_transformation_process
+from src.load.openweather_load_database import start_database_load
+
 
 # 1. Definición de Argumentos por Defecto 
 
@@ -26,29 +30,29 @@ with DAG(
     tags=['OpenWeather Extract-Transform-Load'],
 ) as dag:
 
-# 3. Definición de Tareas (Capa Bronze, Silver y Gold)
+# 3. Definición de Tareas 
     
-    # Ingesta: Extrae datos crudos de la API
+    # 3.1 Ingesta: Extrae datos crudos de la API
 
-    t1_ingest = BashOperator(
+    t1_ingest = PythonOperator(
         task_id='1_ingesta_bronze',
-        bash_command='python /opt/airflow/src/ingestion/openweather_batch_ingest.py'
+        python_callable=start_ingestion_process
     )
 
-    # Transformación: Limpia los datos con Pandas
+    # 3.2 Transformación: Limpia los datos con Pandas
 
-    t2_transform = BashOperator(
+    t2_transform = PythonOperator(
         task_id='2_transform_silver',
-        bash_command='python /opt/airflow/src/transform/openweather_batch_transform.py'
+        python_callable=start_transformation_process
     )
 
-    # Carga: Inserta los datos limpios en PostgreSQL
+    # 3.3 Carga: Inserta los datos limpios en PostgreSQL
 
-    t3_load = BashOperator(
+    t3_load = PythonOperator(
         task_id='3_carga_db',
-        bash_command='python /opt/airflow/src/load/openweather_load_database.py'
+        python_callable=start_database_load
     )
 
-    # 4. Configuración de Dependencias
+# 4. Configuración de Dependencias
     
     t1_ingest >> t2_transform >> t3_load 
