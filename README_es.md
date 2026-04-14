@@ -100,11 +100,11 @@ Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un 
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
 
-La idempotencia se asegura mediante validaciones en cada capa del pipeline:
+La idempotencia se garantiza mediante un enfoque por capas:
 
-Capa Bronze: Los datos crudos (raw) se almacenan de forma inmutable añadiendo marcas de tiempo de ingesta para garantizar una trazabilidad completa.
-Capa Silver: Se normaliza la lógica temporal (truncando los segundos y microsegundos) y se eliminan las posibles duplicidades en memoria utilizando el método `drop_duplicates` de Pandas.
-Capa Gold: La idempotencia se aplica estrictamente a nivel de base de datos. La tabla de hechos en PostgreSQL cuenta con una restricción compuesta `UNIQUE (location_id, time_id)`. Durante la inserción de datos, SQLAlchemy implementa la cláusula `ON CONFLICT DO NOTHING`, lo que permite ignorar de forma segura los registros duplicados y asegurar una consistencia absoluta, sin importar cuántas veces se reejecute el pipeline.
+* **Capa Bronze:** Los datos crudos (raw) se almacenan de forma inmutable, incorporando marcas de tiempo de ingesta para asegurar trazabilidad y evitar sobrescrituras.
+* **Capa Silver:** Se eliminan posibles duplicados en memoria utilizando `drop_duplicates`, asegurando consistencia a nivel de dataset antes de la carga.
+* **Capa Gold:** La idempotencia se refuerza a nivel de base de datos. La tabla de hechos en PostgreSQL define una restricción compuesta `UNIQUE (location_id, time_id)`, y la inserción se realiza mediante `ON CONFLICT DO NOTHING`, evitando duplicaciones y garantizando consistencia ante múltiples ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
 
