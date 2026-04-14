@@ -99,7 +99,11 @@ CSV was chosen to prioritize simplicity and ease of inspection in a local, low-v
 
 **3. How is pipeline idempotency guaranteed?**
 
-Idempotency is ensured through a layered approach: in Bronze, data is stored immutably to guarantee traceability; in Silver, duplicates are removed with `drop_duplicates`; and at the load stage it is reinforced via a composite PRIMARY KEY `(city, processed_timestamp)` in PostgreSQL using `ON CONFLICT DO NOTHING`. This prevents duplications and ensures consistency across pipeline re-executions.
+Idempotency is guaranteed through a layered approach:
+
+- **Bronze Layer:** Raw data is stored immutably, incorporating ingestion timestamps to ensure full traceability and prevent overwrites.
+- **Silver Layer:** Potential duplicates are removed in-memory using `drop_duplicates`, ensuring dataset-level consistency before loading.
+- **Gold Layer:** Idempotency is strictly enforced at the database level. The PostgreSQL fact table defines a composite `UNIQUE (location_id, time_id)` constraint, and data insertion is performed using `ON CONFLICT DO NOTHING`, preventing duplicates and ensuring consistency across multiple pipeline executions.
 
 **4. Why orchestrate with Airflow instead of CRON scripts?**
 

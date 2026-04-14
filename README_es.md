@@ -95,15 +95,23 @@ El flujo está diseñado para transformar datos crudos en insights de negocio:
 Se eligió la arquitectura Medallion para estructurar el pipeline en capas con responsabilidades claramente definidas: almacenamiento de datos sin procesar (Bronze), limpieza y validación de calidad (Silver), y transformaciones orientadas a negocio (Gold), con el objetivo de que los reportes finales consuman siempre datos confiables y coherentes.
 
 **2. ¿Por qué utilizar CSV en la capa Silver en lugar de Parquet?**
+
 Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un entorno local y batch de bajo volumen. En escenarios de mayor escala, Parquet sería preferible por compresión y mejor performance de lectura (sistemas distribuidos).
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
-La idempotencia se asegura mediante un enfoque por capas: en Bronze, los datos se almacenan de forma inmutable para garantizar trazabilidad; en Silver, se eliminan duplicados con `drop_duplicates`; y en la etapa de carga se refuerza mediante una PRIMARY KEY compuesta `(city, processed_timestamp)` en PostgreSQL, utilizando ON CONFLICT DO NOTHING. Esto evita duplicaciones y asegura consistencia ante re-ejecuciones del pipeline.
+
+La idempotencia se garantiza mediante un enfoque por capas:
+
+* **Capa Bronze:** Los datos crudos (raw) se almacenan de forma inmutable, incorporando marcas de tiempo de ingesta para asegurar trazabilidad y evitar sobrescrituras.
+* **Capa Silver:** Se eliminan posibles duplicados en memoria utilizando `drop_duplicates`, asegurando consistencia a nivel de dataset antes de la carga.
+* **Capa Gold:** La idempotencia se refuerza a nivel de base de datos. La tabla de hechos en PostgreSQL define una restricción compuesta `UNIQUE (location_id, time_id)`, y la inserción se realiza mediante `ON CONFLICT DO NOTHING`, evitando duplicaciones y garantizando consistencia ante múltiples ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
+
 Se eligió Airflow porque permite tener mayor control sobre el flujo completo del pipeline, gestionando dependencias (`Ingest >> Transform >> Load >> Report`), reintentos y monitoreo desde una sola interfaz. A diferencia de cron, ofrece visibilidad del estado de cada tarea y facilita escalar el workflow si el proyecto crece en complejidad.
 
 **5. ¿Cómo se gestionan las ubicaciones a procesar?**
+
 La selección de ciudades se desacopló del código mediante un archivo de configuración `cities.yaml` para evitar cambios en el script al agregar o quitar ciudades de interés y respetar los *rate limits* de la API gratuita (*60 peticiones/minuto*).
 
 ---
