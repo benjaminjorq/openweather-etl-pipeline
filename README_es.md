@@ -1,5 +1,11 @@
 # ☀️ OpenWeather ETL Pipeline
 
+---
+
+*🌍 Leer en otros idiomas: [Inglés](README.md) | [Español](README_es.md)*
+
+---
+
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -27,29 +33,29 @@ Como resultado, el sistema genera datasets limpios y estructurados, junto a mét
 <div align="center">
 
 ```text
-Apache Airflow Orchestration
-(Scheduled Batch Execution and Idempotent Workflow Automation)
+Orquestación con Apache Airflow
+(Ejecución Batch Programada y Automatización de Flujos Idempotentes)
           ↓
-OpenWeather API Extraction
-(Weather and Air Pollution Data Collection)
+Extracción API de OpenWeather
+(Recolección de Datos Meteorológicos y de Calidad del Aire)
           ↓
-Data Ingestion & Bronze Layer
-(Data Extraction and Raw JSON Storage)
+Ingesta de Datos y Capa Bronze
+(Extracción de Datos y Almacenamiento Crudo en JSON)
           ↓
-Silver Processing Layer
-(Data Cleaning, Transformation and Pytest Validation)
+Capa de Procesamiento Silver
+(Limpieza de Datos, Transformación y Validación con Pytest)
           ↓
-Structured Data Storage
-(Partitioned CSV Files in Hive-style format)
+Almacenamiento de Datos Estructurados
+(Archivos CSV Particionados en formato estilo Hive)
           ↓
-Dimensional Modeling & Data Warehouse
-(PostgreSQL Upsert to Star Schema: Fact and Dimension Tables)
+Modelado Dimensional y Data Warehouse
+(Upsert en PostgreSQL hacia Esquema Estrella: Tablas de Hechos y Dimensiones)
           ↓
-Gold Analytics Layer
-(Business Aggregations, Rankings, and Reporting Tables)
+Capa Analítica Gold
+(Agregaciones de Negocio, Rankings y Tablas de Reporte)
           ↓
-BI Consumption Layer
-(Analytical Visualizations and Geospatial Insights)
+Capa de Consumo BI
+(Visualizaciones Analíticas e Insights Geoespaciales)
 
 ```
 </div>
