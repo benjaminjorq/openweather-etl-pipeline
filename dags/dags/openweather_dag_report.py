@@ -4,12 +4,17 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from src.reports_to_gold.openweather_gold_report import create_gold_reports
 
+
+# 1. Definición de Argumentos por Defecto 
+
 default_args = {
     'owner': 'benjamin_jorquera',
     'depends_on_past': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
+
+# 2. DAG
 
 with DAG(
     dag_id='openweather_daily_report',
@@ -19,7 +24,11 @@ with DAG(
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"),
     catchup=False,
     tags=['OpenWeather Gold'],
-    
+
+# 3. Definición de Tarea
+
+    # 3.1 Reportes: Genera Ranking y Promedios por Pais
+
 ) as dag:
 
     t1_daily_report = PythonOperator(
