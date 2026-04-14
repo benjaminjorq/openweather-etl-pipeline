@@ -148,15 +148,15 @@ def start_transformation_process():
 
         df["processed_timestamp"] = datetime.now().replace(second=0, microsecond=0)
 
-        columnas_finales = [
+        output_columns = [
             "city", "country", "temperature_c", "feels_like_c", "humidity_pct",
             "pressure_hpa", "wind_speed_ms", "weather_desc", "aqi", "co_level",
             "no2_level", "o3_level", "pm2_5_level", "pm10_level", "processed_timestamp"
         ]
         
-        df = df.reindex(columns=columnas_finales)
+        df = df.reindex(columns=output_columns)
 
-        # 6. Creación y Persistencia del DataFrame
+        # 6. Limpieza y validación del DataFrame
 
         df = clean_and_normalize(df)
         
