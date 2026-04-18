@@ -256,10 +256,24 @@ As a final pipeline validation stage, the data consolidated in the Gold layer wa
 
 <div align="center">
   <img 
-    width="100%" 
+    width="950" 
     alt="City ranking by PM2.5 in Chile" 
     src="https://github.com/user-attachments/assets/5a8ddc13-543d-470a-9486-964bf362698b" 
   />
+
+  <br><br>
+
+  <img 
+    width="450" 
+    alt="Geospatial air quality map in Chile" 
+    src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
+  />
+  
+  <br>
+  
+  <p>
+    <i><b>Geospatial Insights:</b> Interactive map developed in <b>Tableau</b>. Featured insight: <b>Calama</b> (PM2.5: 8.58 µg/m³). [Image rendered with AI].</i>
+  </p>
 </div>
 
 ---
@@ -284,7 +298,7 @@ Data flow automation and control are managed with Apache Airflow. Its implementa
 This flow handles extraction, transformation, and loading into PostgreSQL with executions every 1 hour (12:00, 13:00, etc.).
 
 <p align="center">
-  <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
+  <img width="800" alt="airflow etl dag" src="https://github.com/user-attachments/assets/cadcbb02-6cb8-46e0-8d9f-392a59381556" />
   <br>
   <em>Main DAG view: Successful execution of the Ingestion, Transformation, and Load stages.</em>
 </p>
@@ -294,7 +308,7 @@ This flow handles extraction, transformation, and loading into PostgreSQL with e
 A separate DAG was designed to run once at the end of the day (23:50). Its purpose is to consolidate all data collected throughout the day, calculate numerical averages, and generate the final analytical tables optimized for Business Intelligence tools.
 
 <p align="center">
-  <img width="650" height="214" alt="graphh2" src="https://github.com/user-attachments/assets/e14cf57a-8cf0-437c-88c2-b2ae77d72b62" />
+  <img width="650" alt="airflow gold dag" src="https://github.com/user-attachments/assets/f7b16f47-3557-478f-a82f-c8053fbb1d62" />
   <br>
   <em>Reporting DAG view: Successful execution of the Reporting stage.</em>
 </p>
@@ -487,7 +501,7 @@ Before getting started, make sure you have installed:
 openweather-etl-pipeline/
 ├── config/              # Configuration files (YAML)
 ├── dags/                # Orchestration (Airflow DAGs)
-├── data/                # Local Data Lake
+├── data/                # Local Data Lake (Excluded from git)
 │   ├── bronze/          # Raw JSONs
 │   ├── silver/          # Clean Data (Partitioned)
 │   │   └── year=YYYY/month=MM/day=DD/
@@ -502,6 +516,11 @@ openweather-etl-pipeline/
 ├── pytests/             # Unit tests
 ├── Dockerfile           # Environment image
 ├── docker-compose.yml   # Docker configuration
+├── pytest.ini           # Test configuration
+├── README.md            # Main documentation (English)
+├── README_es.md         # Spanish documentation
+├── .gitignore           # Files excluded from version control
+└── requirements.txt     # Python dependencies
 ```
 
 ---
