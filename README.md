@@ -254,27 +254,32 @@ LIMIT 10;
 
 As a final pipeline validation stage, the data consolidated in the Gold layer was used in analytical visualizations to verify the quality, consistency, and coherence of the metrics generated after the ETL process.
 
+<br>
+
 <div align="center">
   <img 
     width="950" 
-    alt="City ranking by PM2.5 in Chile" 
-    src="https://github.com/user-attachments/assets/5a8ddc13-543d-470a-9486-964bf362698b" 
+    alt="Ranking de ciudades por PM2.5 en Chile" 
+    src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
   />
+</div>
 
-  <br><br>
+<br>
 
+<div align="center">
   <img 
     width="450" 
-    alt="Geospatial air quality map in Chile" 
+    alt="Mapa geoespacial de calidad del aire en Chile" 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
-  
+
   <br>
-  
+
   <p>
-    <i><b>Geospatial Insights:</b> Interactive map developed in <b>Tableau</b>. Featured insight: <b>Calama</b> (PM2.5: 8.58 µg/m³). [Image rendered with AI].</i>
+    <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Imagen Renderizada con IA].</i>
   </p>
 </div>
+
 
 ---
 
