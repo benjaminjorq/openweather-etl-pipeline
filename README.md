@@ -259,7 +259,7 @@ As a final pipeline validation stage, the data consolidated in the Gold layer wa
 <div align="center">
   <img 
     width="950" 
-    alt="Ranking de ciudades por PM2.5 en Chile" 
+    alt="City ranking by PM2.5 in Chile" 
     src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
   />
 </div>
@@ -269,14 +269,14 @@ As a final pipeline validation stage, the data consolidated in the Gold layer wa
 <div align="center">
   <img 
     width="450" 
-    alt="Mapa geoespacial de calidad del aire en Chile" 
+    alt="Geospatial air quality map in Chile" 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
 
   <br>
 
   <p>
-    <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Imagen Renderizada con IA].</i>
+    <i><b>Geospatial Insights:</b> Interactive map developed in <b>Tableau</b>. Example: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Image Rendered with AI].</i>
   </p>
 </div>
 
