@@ -35,21 +35,21 @@ with DAG(
     # 3.1 Ingesta: Extrae datos crudos de la API
 
     t1_ingest = PythonOperator(
-        task_id='1_ingesta_bronze',
+        task_id='1_ingest_bronze_data',
         python_callable=start_ingestion_process
     )
 
     # 3.2 Transformación: Limpia los datos con Pandas
 
     t2_transform = PythonOperator(
-        task_id='2_transform_silver',
+        task_id='2_transform_to_silver',
         python_callable=start_transformation_process
     )
 
     # 3.3 Carga: Inserta los datos limpios en PostgreSQL
 
     t3_load = PythonOperator(
-        task_id='3_carga_db',
+        task_id='3_load_to_database',
         python_callable=start_database_load
     )
 
