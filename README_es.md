@@ -263,15 +263,17 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
 
 <br><br>
 
+<div align="center">
   <img 
-    width="100%" 
-    alt="Mapa geoespacial de calidad del aire" 
-    src=<img width="449" height="643" alt="insight mapa 2 bonito" src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" />
+    width="500" 
+    alt="Mapa geoespacial de calidad del aire en Chile" 
+    src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
+  />
 
-  <br>
-  
+  <br><br>
+
   <p>
-    <i> <b> Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³). [Imagen renderizada con IA].</i>
+    <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³).</i>
   </p>
 </div>
 
