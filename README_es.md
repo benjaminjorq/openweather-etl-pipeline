@@ -257,7 +257,7 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
 
 <div align="center">
   <img 
-    width="900" 
+    width="850" 
     alt="Ranking de ciudades por PM2.5 en Chile" 
     src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
   />
@@ -267,7 +267,7 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
 
 <div align="center">
   <img 
-    width="500" 
+    width="650" 
     alt="Mapa geoespacial de calidad del aire en Chile" 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
