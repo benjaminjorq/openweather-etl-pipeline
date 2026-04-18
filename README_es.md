@@ -261,6 +261,20 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
   />
 </div>
 
+<br><br>
+
+  <img 
+    width="100%" 
+    alt="Mapa geoespacial de calidad del aire" 
+    src=<img width="449" height="643" alt="insight mapa 2 bonito" src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" />
+
+  <br>
+  
+  <p>
+    <i> <b> Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³). [Imagen renderizada con IA].</i>
+  </p>
+</div>
+
 ---
 
 ## Tech Stack & Librerías
@@ -283,9 +297,9 @@ La automatización y el control del flujo de datos se gestionan con Apache Airfl
 Este flujo se encarga de la extracción, transformación y carga en base de datos PostgreSQL con ejecuciones cada 1 hora (12:00 Hrs, 13:00 Hrs, etc.)
 
 <p align="center">
-  <img width="638" alt="graph airflow" src="https://github.com/user-attachments/assets/e9bc10f2-4b2c-4bd1-94d4-c946bdc730e5" />
+  <img width="800" alt="airflow etl dag" src="https://github.com/user-attachments/assets/cadcbb02-6cb8-46e0-8d9f-392a59381556" />
   <br>
-  <em>Vista del DAG principal: Ejecución exitosa de las etapas de Ingesta, Transformación y Carga.</em>
+  <em>Vista del DAG principal: Ejecución existosa de la etapa de Ingesta, Transformación y Carga hacia PostgreSQL.</em>
 </p>
 
 ### 2. Generación de Reportes Gold (Ejecución Diaria)
@@ -293,7 +307,7 @@ Este flujo se encarga de la extracción, transformación y carga en base de dato
 Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de datos recopilados durante el dia, calcular los promedios numéricos y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
 
 <p align="center">
-  <img width="650" height="214" alt="graphh2" src="https://github.com/user-attachments/assets/e14cf57a-8cf0-437c-88c2-b2ae77d72b62" />
+  <img width="800" alt="airflow gold dag" src="https://github.com/user-attachments/assets/f7b16f47-3557-478f-a82f-c8053fbb1d62" />
   <br>
   <em>Vista del DAG de reportes: Ejecución exitosa de la etapa de Reporteria.</em>
 </p>
@@ -409,7 +423,7 @@ Antes de comenzar, asegúrate de tener instalado:
 openweather-etl-pipeline/
 ├── config/              # Configuraciones (YAML)
 ├── dags/                # Orquestación (DAGs de Airflow)
-├── data/                # Data Lake Local
+├── data/                # Data Lake Local (Excluido de git)
 │   ├── bronze/          # Raw JSONs
 │   ├── silver/          # Datos Limpios (Particionados)
 │   │   └── year=YYYY/month=MM/day=DD/
@@ -424,6 +438,11 @@ openweather-etl-pipeline/
 ├── pytests/             # Pruebas unitarias
 ├── Dockerfile           # Imagen del entorno
 ├── docker-compose.yml   # Configuración Docker
+├── pytest.ini           # Configuracion de pruebas
+├── README.md            # Documentacion principal (English)
+├── README_es.md         # Documentacion en Español
+├── .gitignore           # Archivos excluidos del control de versiones
+└── requirements.txt     # Dependencias de Python
 
 ```
 ---
