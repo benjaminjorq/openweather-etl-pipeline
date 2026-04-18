@@ -255,13 +255,11 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
 
 <div align="center">
   <img 
-    width="100%" 
+    width="900" 
     alt="Ranking de ciudades por PM2.5 en Chile" 
     src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
   />
 </div>
-
-<br><br>
 
 <div align="center">
   <img 
@@ -270,11 +268,11 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
 
-  <br><br>
-  <p>
-    <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³).</i>
+  <p style="margin-top:10px;">
+    <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Imagen Renderizada con IA].</i>
   </p>
 </div>
+
 ---
 
 ## Tech Stack & Librerías
