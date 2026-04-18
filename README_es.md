@@ -253,6 +253,8 @@ LIMIT 10;
 
 Como etapa final de validación del pipeline, los datos consolidados en la capa Gold fueron utilizados en visualizaciones analíticas para verificar la calidad, consistencia y coherencia de las métricas generadas tras el proceso ETL.
 
+<br>
+
 <div align="center">
   <img 
     width="900" 
@@ -261,6 +263,8 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
   />
 </div>
 
+<br>
+
 <div align="center">
   <img 
     width="500" 
@@ -268,7 +272,9 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
 
-  <p style="margin-top:10px;">
+  <br>
+
+  <p>
     <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Imagen Renderizada con IA].</i>
   </p>
 </div>
