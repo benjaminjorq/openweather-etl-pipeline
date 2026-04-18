@@ -267,7 +267,7 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
 
 <div align="center">
   <img 
-    width="500" 
+    width="450" 
     alt="Mapa geoespacial de calidad del aire en Chile" 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
