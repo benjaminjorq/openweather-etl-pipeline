@@ -271,12 +271,10 @@ Como etapa final de validación del pipeline, los datos consolidados en la capa 
   />
 
   <br><br>
-
   <p>
     <i><b>Insights Geoespaciales:</b> Mapa interactivo desarrollado en <b>Tableau</b>. Ejemplo: <b>Calama</b> (PM2.5: 8.58 µg/m³).</i>
   </p>
 </div>
-
 ---
 
 ## Tech Stack & Librerías
@@ -309,7 +307,7 @@ Este flujo se encarga de la extracción, transformación y carga en base de dato
 Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 Hrs). Su objetivo es consolidar todo el historial de datos recopilados durante el dia, calcular los promedios numéricos y generar las tablas analíticas finales optimizadas para herramientas de Business Intelligence.
 
 <p align="center">
-  <img width="800" alt="airflow gold dag" src="https://github.com/user-attachments/assets/f7b16f47-3557-478f-a82f-c8053fbb1d62" />
+  <img width="650" alt="airflow gold dag" src="https://github.com/user-attachments/assets/f7b16f47-3557-478f-a82f-c8053fbb1d62" />
   <br>
   <em>Vista del DAG de reportes: Ejecución exitosa de la etapa de Reporteria.</em>
 </p>
