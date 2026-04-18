@@ -260,7 +260,7 @@ As a final pipeline validation stage, the data consolidated in the Gold layer wa
   <img 
     width="950" 
     alt="City ranking by PM2.5 in Chile" 
-    src="https://github.com/user-attachments/assets/0de95ff2-c065-4768-b1ea-6c228b0ea155" 
+    src="https://github.com/user-attachments/assets/6e2bb579-7c5a-46b9-bd07-76a3b3bee9f0"
   />
 </div>
 
