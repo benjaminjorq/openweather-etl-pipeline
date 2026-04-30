@@ -535,7 +535,7 @@ openweather-etl-pipeline/
 These improvements reflect a natural evolution from a local environment toward a more production-ready pipeline, prioritizing scalability, observability, and data quality.
 
 - **Observability:** Failure alerting via Airflow callbacks (Slack/Email integrations)
-- **Data Contracts:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
+- **Config:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
 - **Advanced Testing:** Incorporation of fixtures in Pytest to improve coverage and isolate test scenarios.
 - **Storage Optimization:** Migration of the Silver layer from CSV to columnar format (Parquet) for improved performance and efficiency.
 - **Scalability:** Deployment in cloud environments (AWS/GCP) and adaptation to distributed processing with Apache Spark.
