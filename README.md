@@ -28,6 +28,27 @@ As a result, the system generates clean and structured datasets, along with aggr
 
 ---
 
+## Data Context: Air Pollution & Weather Metrics
+
+To provide context for the analytical outputs of this pipeline, the following key variables are tracked:
+
+**1. Air Pollution Indicators**
+* **AQI (Air Quality Index):** Standardized indicator used to classify overall air pollution levels.
+* **PM2.5 & PM10 (Particulate Matter):** Fine inhalable particles; PM2.5 is particularly harmful due to its ability to penetrate deep into the lungs.
+* **CO (Carbon Monoxide) & NO₂ (Nitrogen Dioxide):** Toxic gases mainly produced by traffic and industrial activity.
+* **O₃ (Ozone):** Secondary pollutant formed by chemical reactions in sunlight; harmful at ground level.
+
+**2. Meteorological Context**
+Weather conditions directly influence pollutant dispersion and concentration:
+
+* **Atmospheric Pressure:** High-pressure systems can trap pollutants near the surface.
+* **Wind Speed:** Higher wind speeds help disperse pollutants and improve air quality.
+* **Temperature & Humidity:** Key variables that affect pollutant behavior and environmental conditions.
+
+These variables are used in the Gold layer to generate pollution rankings and support analytical insights.
+
+---
+
 ## ETL Diagram
 
 <div align="center">
