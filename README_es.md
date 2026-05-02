@@ -28,26 +28,15 @@ Como resultado, el sistema genera datasets limpios y estructurados, junto a mét
 
 ---
 
-##  Métricas de Contaminación y Clima
+##  Métricas de Calidad del Aire
 
-Para interpretar correctamente los resultados del pipeline, se consideran las siguientes variables clave:
+El pipeline analiza indicadores clave de contaminación:
 
-### 1. Indicadores de Contaminación del Aire
+- **AQI:** Nivel general de calidad del aire (bueno, moderado, etc.).
+- **PM2.5 / PM10:** Partículas en el aire; el PM2.5 es más perjudicial por su tamaño.
+- **CO, NO₂, O₃:** Gases contaminantes provenientes principalmente del tráfico, la industria y reacciones químicas en presencia de luz solar.
 
-- **AQI (Índice de Calidad del Aire):** Indicador que resume el nivel general de contaminación en una escala simple (bueno, moderado, etc.).
-- **PM2.5 y PM10 (Material Particulado):** Pequeñas partículas en el aire; el PM2.5 es más peligroso por su capacidad de ingresar al sistema respiratorio.
-- **CO (Monóxido de Carbono) y NO₂ (Dióxido de Nitrógeno):** Gases contaminantes generados principalmente por vehículos e industrias.
-- **O₃ (Ozono):** Contaminante que se forma por reacciones químicas con la luz solar y afecta la calidad del aire a nivel del suelo.
-
-### 2. Contexto Meteorológico
-
-Las condiciones climáticas influyen directamente en cómo se dispersan o acumulan los contaminantes:
-
-- **Presión Atmosférica:** Altas presiones favorecen condiciones de aire estable, reduciendo la dispersión de contaminantes.
-- **Velocidad del Viento:** Vientos más intensos ayudan a dispersar contaminantes.
-- **Temperatura y Humedad:** Factores que influyen en el comportamiento de los contaminantes en el ambiente.
-
-Estas variables permiten generar rankings de contaminación y análisis comparativos entre ciudades en la capa Gold.
+También se consideran variables climáticas como presión, viento, temperatura y humedad, ya que influyen en la dispersión o acumulación de contaminantes.
 
 ---
 
