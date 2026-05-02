@@ -28,26 +28,15 @@ As a result, the system generates clean and structured datasets, along with aggr
 
 ---
 
-## Data Context: Air Pollution & Weather Metrics
+## Air Pollution Metrics
 
-To properly interpret the pipeline outputs, the following key variables are used:
+The pipeline analyzes key air quality indicators:
 
-### 1. Air Pollution Indicators
+- **AQI:** Overall air quality level (good, moderate, unhealthy).
+- **PM2.5 / PM10:** Airborne particles; PM2.5 is more harmful due to its small size.
+- **CO, NO₂, O₃:** Pollutant gases mainly from traffic, industry, and chemical reactions in sunlight.
 
-- **AQI (Air Quality Index):** A simplified indicator that represents overall air pollution levels (e.g., good, moderate, unhealthy).
-- **PM2.5 and PM10 (Particulate Matter):** Tiny particles suspended in the air; PM2.5 is more harmful due to its ability to enter the respiratory system.
-- **CO (Carbon Monoxide) and NO₂ (Nitrogen Dioxide):** Pollutant gases mainly produced by vehicles and industrial activity.
-- **O₃ (Ozone):** A pollutant formed by chemical reactions in sunlight that affects air quality at ground level.
-
-### 2. Meteorological Context
-
-Weather conditions directly influence how pollutants disperse or accumulate:
-
-- **Atmospheric Pressure:** Higher pressure leads to more stable air conditions, reducing pollutant dispersion.
-- **Wind Speed:** Stronger winds help disperse pollutants.
-- **Temperature and Humidity:** Factors that influence how pollutants behave in the environment.
-
-These variables are used in the Gold layer to generate pollution rankings and enable comparative analysis across cities.
+Weather variables such as pressure, wind, temperature, and humidity are also included, as they influence how pollutants disperse or accumulate.
 
 ---
 
