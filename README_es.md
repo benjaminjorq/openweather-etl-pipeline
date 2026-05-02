@@ -30,22 +30,24 @@ Como resultado, el sistema genera datasets limpios y estructurados, junto a mét
 
 ##  Métricas de Contaminación y Clima
 
-Para dar contexto a los resultados analíticos generados por el pipeline, se consideran las siguientes variables clave:
+Para interpretar correctamente los resultados del pipeline, se consideran las siguientes variables clave:
 
-**1. Indicadores de Contaminación del Aire**
-* **AQI (Índice de Calidad del Aire):** Indicador estandarizado utilizado para clasificar los niveles de contaminación.
-* **PM2.5 y PM10 (Material Particulado):** Partículas suspendidas en el aire; el PM2.5 es más peligroso por su capacidad de penetrar profundamente en los pulmones.
-* **CO (Monóxido de Carbono) y NO₂ (Dióxido de Nitrógeno):** Gases tóxicos generados principalmente por el tráfico y la actividad industrial.
-* **O₃ (Ozono):** Contaminante secundario que se forma por reacciones químicas en presencia de luz solar; perjudicial a nivel del suelo.
+### 1. Indicadores de Contaminación del Aire
 
-**2. Contexto Meteorológico**
-Las condiciones climáticas influyen directamente en la dispersión y concentración de contaminantes:
+- **AQI (Índice de Calidad del Aire):** Indicador que resume el nivel general de contaminación en una escala simple (bueno, moderado, etc.).
+- **PM2.5 y PM10 (Material Particulado):** Pequeñas partículas en el aire; el PM2.5 es más peligroso por su capacidad de ingresar al sistema respiratorio.
+- **CO (Monóxido de Carbono) y NO₂ (Dióxido de Nitrógeno):** Gases contaminantes generados principalmente por vehículos e industrias.
+- **O₃ (Ozono):** Contaminante que se forma por reacciones químicas con la luz solar y afecta la calidad del aire a nivel del suelo.
 
-* **Presión Atmosférica:** Sistemas de alta presión pueden atrapar contaminantes cerca de la superficie.
-* **Velocidad del Viento:** Vientos más intensos favorecen la dispersión de contaminantes.
-* **Temperatura y Humedad:** Variables que afectan el comportamiento de los contaminantes y las condiciones ambientales.
+### 2. Contexto Meteorológico
 
-Estas variables son utilizadas en la capa Gold para generar rankings de contaminación y apoyar el análisis de calidad del aire.
+Las condiciones climáticas influyen directamente en cómo se dispersan o acumulan los contaminantes:
+
+- **Presión Atmosférica:** Altas presiones favorecen condiciones de aire estable, reduciendo la dispersión de contaminantes.
+- **Velocidad del Viento:** Vientos más intensos ayudan a dispersar contaminantes.
+- **Temperatura y Humedad:** Factores que influyen en el comportamiento de los contaminantes en el ambiente.
+
+Estas variables permiten generar rankings de contaminación y análisis comparativos entre ciudades en la capa Gold.
 
 ---
 
