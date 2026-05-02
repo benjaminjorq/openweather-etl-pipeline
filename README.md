@@ -32,9 +32,9 @@ As a result, the system generates clean and structured datasets, along with aggr
 
 The pipeline analyzes key air quality indicators:
 
-- **AQI:** Overall air quality level (good, moderate, unhealthy).
-- **PM2.5 / PM10:** Airborne particles; PM2.5 is more harmful due to its small size.
-- **CO, NO₂, O₃:** Pollutant gases mainly from traffic, industry, and chemical reactions in sunlight.
+- **`AQI`:** Overall air quality level (good, moderate, unhealthy).
+- **`PM2.5 / PM10`:** Airborne particles; PM2.5 is more harmful due to its small size.
+- **`CO`, `NO₂`, `O₃`:** Pollutant gases mainly from traffic, industry, and chemical reactions in sunlight.
 
 Weather variables such as pressure, wind, temperature, and humidity are also included, as they influence how pollutants disperse or accumulate.
 
