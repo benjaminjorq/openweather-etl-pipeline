@@ -32,9 +32,9 @@ Como resultado, el sistema genera datasets limpios y estructurados, junto a mét
 
 El pipeline analiza indicadores clave de contaminación:
 
-- **AQI:** Nivel general de calidad del aire (bueno, moderado, etc.).
-- **PM2.5 / PM10:** Partículas en el aire; el PM2.5 es más perjudicial por su tamaño.
-- **CO, NO₂, O₃:** Gases contaminantes provenientes principalmente del tráfico, la industria y reacciones químicas en presencia de luz solar.
+- **`AQI`:** Nivel general de calidad del aire (bueno, moderado, etc.).
+- **`PM2.5 / PM10`:** Partículas en el aire; el PM2.5 es más perjudicial por su tamaño.
+- **`CO`, `NO₂`, `O₃`:** Gases contaminantes provenientes principalmente del tráfico, la industria y reacciones químicas en presencia de luz solar.
 
 También se consideran variables climáticas como presión, viento, temperatura y humedad, ya que influyen en la dispersión o acumulación de contaminantes.
 
