@@ -30,22 +30,24 @@ As a result, the system generates clean and structured datasets, along with aggr
 
 ## Data Context: Air Pollution & Weather Metrics
 
-To provide context for the analytical outputs of this pipeline, the following key variables are tracked:
+To properly interpret the pipeline outputs, the following key variables are used:
 
-**1. Air Pollution Indicators**
-* **AQI (Air Quality Index):** Standardized indicator used to classify overall air pollution levels.
-* **PM2.5 & PM10 (Particulate Matter):** Fine inhalable particles; PM2.5 is particularly harmful due to its ability to penetrate deep into the lungs.
-* **CO (Carbon Monoxide) & NO₂ (Nitrogen Dioxide):** Toxic gases mainly produced by traffic and industrial activity.
-* **O₃ (Ozone):** Secondary pollutant formed by chemical reactions in sunlight; harmful at ground level.
+### 1. Air Pollution Indicators
 
-**2. Meteorological Context**
-Weather conditions directly influence pollutant dispersion and concentration:
+- **AQI (Air Quality Index):** A simplified indicator that represents overall air pollution levels (e.g., good, moderate, unhealthy).
+- **PM2.5 and PM10 (Particulate Matter):** Tiny particles suspended in the air; PM2.5 is more harmful due to its ability to enter the respiratory system.
+- **CO (Carbon Monoxide) and NO₂ (Nitrogen Dioxide):** Pollutant gases mainly produced by vehicles and industrial activity.
+- **O₃ (Ozone):** A pollutant formed by chemical reactions in sunlight that affects air quality at ground level.
 
-* **Atmospheric Pressure:** High-pressure systems can trap pollutants near the surface.
-* **Wind Speed:** Higher wind speeds help disperse pollutants and improve air quality.
-* **Temperature & Humidity:** Key variables that affect pollutant behavior and environmental conditions.
+### 2. Meteorological Context
 
-These variables are used in the Gold layer to generate pollution rankings and support analytical insights.
+Weather conditions directly influence how pollutants disperse or accumulate:
+
+- **Atmospheric Pressure:** Higher pressure leads to more stable air conditions, reducing pollutant dispersion.
+- **Wind Speed:** Stronger winds help disperse pollutants.
+- **Temperature and Humidity:** Factors that influence how pollutants behave in the environment.
+
+These variables are used in the Gold layer to generate pollution rankings and enable comparative analysis across cities.
 
 ---
 
