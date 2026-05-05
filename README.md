@@ -28,6 +28,18 @@ As a result, the system generates clean and structured datasets, along with aggr
 
 ---
 
+## Air Pollution Metrics
+
+The pipeline analyzes key air quality indicators:
+
+- **`AQI`:** Overall air quality level (good, moderate, unhealthy).
+- **`PM2.5 / PM10`:** Airborne particles; PM2.5 is more harmful due to its small size.
+- **`CO`, `NO₂`, `O₃`:** Pollutant gases mainly from traffic, industry, and chemical reactions in sunlight.
+
+Weather variables such as pressure, wind, temperature, and humidity are also included, as they influence how pollutants disperse or accumulate.
+
+---
+
 ## ETL Diagram
 
 <div align="center">
@@ -254,27 +266,32 @@ LIMIT 10;
 
 As a final pipeline validation stage, the data consolidated in the Gold layer was used in analytical visualizations to verify the quality, consistency, and coherence of the metrics generated after the ETL process.
 
+<br>
+
 <div align="center">
   <img 
     width="950" 
     alt="City ranking by PM2.5 in Chile" 
-    src="https://github.com/user-attachments/assets/5a8ddc13-543d-470a-9486-964bf362698b" 
+    src="https://github.com/user-attachments/assets/6e2bb579-7c5a-46b9-bd07-76a3b3bee9f0"
   />
+</div>
 
-  <br><br>
+<br>
 
+<div align="center">
   <img 
     width="450" 
     alt="Geospatial air quality map in Chile" 
     src="https://github.com/user-attachments/assets/78ae23b8-58bb-4c3c-9151-65991f85cb2b" 
   />
-  
+
   <br>
-  
+
   <p>
-    <i><b>Geospatial Insights:</b> Interactive map developed in <b>Tableau</b>. Featured insight: <b>Calama</b> (PM2.5: 8.58 µg/m³). [Image rendered with AI].</i>
+    <i><b>Geospatial Insights:</b> Interactive map developed in <b>Tableau</b>. Example: <b>Calama</b> (PM2.5: 8.58 µg/m³) [Image Rendered with AI].</i>
   </p>
 </div>
+
 
 ---
 
@@ -530,7 +547,7 @@ openweather-etl-pipeline/
 These improvements reflect a natural evolution from a local environment toward a more production-ready pipeline, prioritizing scalability, observability, and data quality.
 
 - **Observability:** Failure alerting via Airflow callbacks (Slack/Email integrations)
-- **Data Contracts:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
+- **Config:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
 - **Advanced Testing:** Incorporation of fixtures in Pytest to improve coverage and isolate test scenarios.
 - **Storage Optimization:** Migration of the Silver layer from CSV to columnar format (Parquet) for improved performance and efficiency.
 - **Scalability:** Deployment in cloud environments (AWS/GCP) and adaptation to distributed processing with Apache Spark.

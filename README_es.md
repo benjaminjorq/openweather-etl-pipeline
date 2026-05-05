@@ -28,6 +28,18 @@ Como resultado, el sistema genera datasets limpios y estructurados, junto a mét
 
 ---
 
+##  Métricas de Calidad del Aire
+
+El pipeline analiza indicadores clave de contaminación:
+
+- **`AQI`:** Nivel general de calidad del aire (bueno, moderado, etc.).
+- **`PM2.5 / PM10`:** Partículas en el aire; el PM2.5 es más perjudicial por su tamaño.
+- **`CO`, `NO₂`, `O₃`:** Gases contaminantes provenientes principalmente del tráfico, la industria y reacciones químicas en presencia de luz solar.
+
+También se consideran variables climáticas como presión, viento, temperatura y humedad, ya que influyen en la dispersión o acumulación de contaminantes.
+
+---
+
 ## Diagrama ETL
 
 <div align="center">
@@ -456,7 +468,7 @@ openweather-etl-pipeline/
 Estas mejoras reflejan una evolución natural desde un entorno local hacia un pipeline más cercano a producción, priorizando escalabilidad, observabilidad y calidad de datos.
 
 - **Observabilidad:** Implementación de alertas ante fallos (Slack/Email) en Apache Airflow.
-- **Data Contracts:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
+- **Configuración:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
 - **Testing Avanzado:** Incorporación de fixtures en Pytest para mejorar cobertura y aislar escenarios de prueba.
 - **Optimización de Almacenamiento:** Migración de la capa Silver desde CSV a formato columnar (Parquet) para mejorar performance y eficiencia.
 - **Escalabilidad:** Despliegue en entornos cloud (AWS/GCP) y adaptación a procesamiento distribuido con Apache Spark.
