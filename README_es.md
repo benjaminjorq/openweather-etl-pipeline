@@ -55,13 +55,13 @@ Ingesta de Datos y Capa Bronze
 (Extracción de Datos y Almacenamiento Crudo en JSON)
           ↓
 Capa de Procesamiento Silver
-(Limpieza de Datos, Transformación y Validación con Pytest)
+(Limpieza de Datos, Transformación y Validaciones con Pandas)
           ↓
 Almacenamiento de Datos Estructurados
 (Archivos CSV Particionados en formato estilo Hive)
           ↓
 Modelado Dimensional y Data Warehouse
-(Upsert en PostgreSQL hacia Esquema Estrella: Tablas de Hechos y Dimensiones)
+(Carga de datos en PostgreSQL hacia Esquema Estrella: Tablas de Hechos y Dimensiones)
           ↓
 Capa Analítica Gold
 (Agregaciones de Negocio, Rankings y Tablas de Reporte)
@@ -112,11 +112,11 @@ Se optó por CSV para priorizar la simplicidad y facilidad de inspección en un 
 
 **3. ¿Cómo se garantiza la Idempotencia del pipeline?**
 
-La idempotencia se garantiza mediante un enfoque por capas:
+La idempotencia se implementa mediante un enfoque por capas:
 
 * **Capa Bronze:** Los datos crudos (raw) se almacenan de forma inmutable, incorporando marcas de tiempo de ingesta para asegurar trazabilidad y evitar sobrescrituras.
 * **Capa Silver:** Se eliminan posibles duplicados en memoria utilizando `drop_duplicates`, asegurando consistencia a nivel de dataset antes de la carga.
-* **Capa Gold:** La idempotencia se refuerza a nivel de base de datos. La tabla de hechos en PostgreSQL define una restricción compuesta `UNIQUE (location_id, time_id)`, y la inserción se realiza mediante `ON CONFLICT DO NOTHING`, evitando duplicaciones y garantizando consistencia ante múltiples ejecuciones del pipeline.
+* **Capa Gold:** La idempotencia se refuerza truncando la tabla de staging en cada ejecución (TRUNCATE) para garantizar un estado limpio, y mediante restricciones UNIQUE (location_id, time_id) junto con `ON CONFLICT DO NOTHING` en dimensiones y tabla de hechos, evitando duplicados ante múltiples ejecuciones del pipeline.
 
 **4. ¿Por qué Orquestar con Airflow en lugar de CRON scripts?**
 
@@ -135,7 +135,7 @@ Para realizar consultas analíticas, los datos planos de la capa Silver se trans
 Esta arquitectura separa lo descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
-<img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
+<img width="1156" height="528" alt="erd white" src=<img width="1091" height="704" alt="erd white" src="https://github.com/user-attachments/assets/fc531fd3-0b4a-4ec6-b25a-81ae78b6fe15" />
   <br>
   <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
   <br>
@@ -332,7 +332,7 @@ Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 
 
 ## Pruebas Unitarias (Testing)
 
-En este proyecto se implementó un conjunto de pruebas automatizadas utilizando **Pytest** para estudiar y garantizar la integridad, consistencia y calidad de los datos antes de su inserción en PostgreSQL. Para lograrlo, se diseñó un entorno que inyecta un *dataset* simulado con errores comunes (espacios extra, valores nulos, inconsistencia de mayúsculas y tipos de datos mixtos) directamente en la función de transformación de la capa Silver (`clean_and_normalize`). Esto asegura que los datos cumplan con los formatos requeridos.
+En este proyecto se implementó un conjunto de pruebas automatizadas utilizando **Pytest** para estudiar y garantizar la integridad, consistencia y calidad de los datos antes de su inserción en PostgreSQL. Para lograrlo, se implementó una **fixture** llamada `raw_dataset` encargada de generar un DataFrame con errores comunes (espacios extra, valores nulos, inconsistencia de mayúsculas y tipos de datos mixtos) directamente en la función de transformación de la capa Silver (`clean_and_normalize`). Esto asegura que los datos cumplan con los formatos requeridos.
 
 ### Casos de Prueba Cubiertos
 
@@ -345,19 +345,24 @@ En este proyecto se implementó un conjunto de pruebas automatizadas utilizando 
 Para correr las pruebas localmente y verificar la lógica de transformación, ejecuta el siguiente comando desde la raíz del proyecto:
 
 ```bash
-python -m pytest pytests/test_transform.py
+pytest pytests/test_transform.py -v
 ```
 
 ```text
 
-============================= test session starts =============================
-platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+============================= test session starts ==============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- c:\Users\Benjamin\airwatch\.venv\Scripts\python.exe
+cachedir: .pytest_cache
 rootdir: C:\Users\Benjamin\airwatch
 configfile: pytest.ini
 plugins: anyio-4.12.0
 collected 3 items
-pytests\test_transform.py ...                                            [100%]
-============================== 3 passed in 1.94s ==============================
+
+pytests/test_transform.py::test_string_cleaning PASSED                   [ 33%]
+pytests/test_transform.py::test_numeric_casting PASSED                   [ 66%]
+pytests/test_transform.py::test_date_conversion PASSED                   [100%]
+
+============================== 3 passed in 1.86s ===============================
 
 ```
 ---
@@ -469,9 +474,9 @@ Estas mejoras reflejan una evolución natural desde un entorno local hacia un pi
 
 - **Observabilidad:** Implementación de alertas ante fallos (Slack/Email) en Apache Airflow.
 - **Configuración:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
-- **Testing Avanzado:** Incorporación de fixtures en Pytest para mejorar cobertura y aislar escenarios de prueba.
 - **Optimización de Almacenamiento:** Migración de la capa Silver desde CSV a formato columnar (Parquet) para mejorar performance y eficiencia.
 - **Escalabilidad:** Despliegue en entornos cloud (AWS/GCP) y adaptación a procesamiento distribuido con Apache Spark.
+- **CI/CD (Integración Continua):** Implementación de flujos de trabajo con **GitHub Actions** para automatizar la ejecución de pruebas unitarias (`pytest`) y validaciones en cada *Push* o *Pull Request*.
 
 
 
