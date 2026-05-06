@@ -55,13 +55,13 @@ Data Ingestion & Bronze Layer
 (Data Extraction and Raw JSON Storage)
           ↓
 Silver Processing Layer
-(Data Cleaning, Transformation and Pytest Validation)
+(Data Cleaning, Transformation and Validation using Pandas)
           ↓
 Structured Data Storage
 (Partitioned CSV Files in Hive-style format)
           ↓
 Dimensional Modeling & Data Warehouse
-(PostgreSQL Upsert to Star Schema: Fact and Dimension Tables)
+(Data into PostgreSQL using a Star Schema: Fact and Dimension Tables)
           ↓
 Gold Analytics Layer
 (Business Aggregations, Rankings, and Reporting Tables)
@@ -111,11 +111,11 @@ CSV was chosen to prioritize simplicity and ease of inspection in a local, low-v
 
 **3. How is pipeline idempotency guaranteed?**
 
-Idempotency is guaranteed through a layered approach:
+Idempotency is implemented through a layered approach:
 
 - **Bronze Layer:** Raw data is stored immutably, incorporating ingestion timestamps to ensure full traceability and prevent overwrites.
 - **Silver Layer:** Potential duplicates are removed in-memory using `drop_duplicates`, ensuring dataset-level consistency before loading.
-- **Gold Layer:** Idempotency is strictly enforced at the database level. The PostgreSQL fact table defines a composite `UNIQUE (location_id, time_id)` constraint, and data insertion is performed using `ON CONFLICT DO NOTHING`, preventing duplicates and ensuring consistency across multiple pipeline executions.
+- **Gold Layer:** Idempotency is reinforced by truncating the staging table on each execution (TRUNCATE), ensuring a clean state. In addition, UNIQUE (location_id, time_id) constraints together with ON CONFLICT DO NOTHING are applied in both dimension and fact tables, preventing duplicate records in case of multiple pipeline executions.
 
 **4. Why orchestrate with Airflow instead of CRON scripts?**
 
@@ -134,7 +134,7 @@ For analytical queries, the flat data from the Silver layer is transformed and l
 This architecture separates descriptive attributes from quantitative metrics, ensuring referential integrity and optimizing the database for Business Intelligence (BI) tools.
 
 <div align="center">
-<img width="1156" height="528" alt="erd white" src="https://github.com/user-attachments/assets/ba981cd0-08bf-4dc0-81b6-c7cd6108c12f" />
+<img width="1091" height="704" alt="erd white" src="https://github.com/user-attachments/assets/fc531fd3-0b4a-4ec6-b25a-81ae78b6fe15" />
   <br>
   <em>Entity-Relationship Diagram (ERD) generated from PostgreSQL showing Primary Keys and Foreign Keys.</em><br>
   <br>
@@ -334,7 +334,7 @@ A separate DAG was designed to run once at the end of the day (23:50). Its purpo
 
 ## Unit Testing
 
-This project implements a set of automated tests using **Pytest** to ensure data integrity, consistency, and quality before loading into PostgreSQL. A testing environment was designed to inject a simulated *dataset* with common errors (extra whitespace, null values, case inconsistencies, and mixed data types) directly into the Silver layer transformation function (`clean_and_normalize`). This ensures that data meets the required formats.
+In this project, a set of automated tests was implemented using **Pytest** to ensure data integrity, consistency, and quality before insertion into PostgreSQL. To achieve this, a **fixture** called raw_dataset was created to generate a DataFrame containing common data issues (extra spaces, null values, inconsistent capitalization, and mixed data types) directly within the Silver layer transformation function (clean_and_normalize). This ensures that the data complies with the required formats.
 
 ### Test Cases Covered
 
@@ -347,18 +347,23 @@ This project implements a set of automated tests using **Pytest** to ensure data
 To run the tests locally and verify the transformation logic, execute the following command from the project root:
 
 ```bash
-python -m pytest pytests/test_transform.py
+pytest pytests/test_transform.py -v
 ```
 
 ```text
-============================= test session starts =============================
-platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+============================= test session starts ==============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- c:\Users\Benjamin\airwatch\.venv\Scripts\python.exe
+cachedir: .pytest_cache
 rootdir: C:\Users\Benjamin\airwatch
 configfile: pytest.ini
 plugins: anyio-4.12.0
 collected 3 items
-pytests\test_transform.py ...                                            [100%]
-============================== 3 passed in 1.94s ==============================
+
+pytests/test_transform.py::test_string_cleaning PASSED                   [ 33%]
+pytests/test_transform.py::test_numeric_casting PASSED                   [ 66%]
+pytests/test_transform.py::test_date_conversion PASSED                   [100%]
+
+============================== 3 passed in 1.86s ===============================
 ```
 
 ---
@@ -548,6 +553,6 @@ These improvements reflect a natural evolution from a local environment toward a
 
 - **Observability:** Failure alerting via Airflow callbacks (Slack/Email integrations)
 - **Config:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
-- **Advanced Testing:** Incorporation of fixtures in Pytest to improve coverage and isolate test scenarios.
 - **Storage Optimization:** Migration of the Silver layer from CSV to columnar format (Parquet) for improved performance and efficiency.
 - **Scalability:** Deployment in cloud environments (AWS/GCP) and adaptation to distributed processing with Apache Spark.
+- **CI/CD (Continuous Integration):** Implementation of GitHub Actions workflows to automate unit test execution (pytest) and validations on every push or pull request.
