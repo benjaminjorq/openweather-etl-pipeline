@@ -109,23 +109,38 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
 
     with engine.begin() as connection:
 
-        df.to_sql(name="weather_silver_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
+        # Etapa 1: Staging 
+        # Se trunca antes de insertar para evitar registros duplicados.
+        # Si Airflow reintenta esta tarea, la staging siempre parte limpia.
+
+        connection.execute(text("TRUNCATE TABLE public.weather_staging_table"))
+        logging.info("Staging truncada correctamente.")
+
+        df.to_sql(name="weather_staging_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
 
         logging.info(f"Carga a Staging exitosa: {len(df)} registros insertados.")
-        logging.info("Actualizando datos en Gold")
+        
+        # Etapa 2: Data Warehouse
+
+        logging.info("Iniciando traspaso al Data Warehouse (Star Schema)")
         
         query = """
             -- 1. Actualizar Dimensión Location
+
             INSERT INTO dwh.dim_location (city, country)
-            SELECT DISTINCT city, country FROM public.weather_silver_table
+            SELECT DISTINCT city, country
+            FROM public.weather_staging_table
             ON CONFLICT (city, country) DO NOTHING;
 
             -- 2. Actualizar Dimensión Weather Condition
+
             INSERT INTO dwh.dim_weather_condition (description)
-            SELECT DISTINCT weather_desc FROM public.weather_silver_table
+            SELECT DISTINCT weather_desc
+            FROM public.weather_staging_table
             ON CONFLICT (description) DO NOTHING;
 
             -- 3. Actualizar Dimensión Time
+
             INSERT INTO dwh.dim_time (full_date, hour, day, month, year)
             SELECT DISTINCT 
                 processed_timestamp::TIMESTAMP,
@@ -133,10 +148,11 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
                 EXTRACT(DAY FROM processed_timestamp::TIMESTAMP),
                 EXTRACT(MONTH FROM processed_timestamp::TIMESTAMP),
                 EXTRACT(YEAR FROM processed_timestamp::TIMESTAMP)
-            FROM public.weather_silver_table
+            FROM public.weather_staging_table
             ON CONFLICT (full_date) DO NOTHING;
 
             -- 4. Tabla de Hechos 
+
             INSERT INTO dwh.fact_weather_metrics (
                 location_id, time_id, condition_id, aqi_id,
                 feels_like_c, pressure_hpa,
@@ -148,7 +164,7 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
                 s.feels_like_c, s.pressure_hpa, 
                 s.temperature_c, s.humidity_pct, s.wind_speed_ms,
                 s.pm2_5_level, s.pm10_level, s.co_level, s.no2_level, s.o3_level
-            FROM public.weather_silver_table AS s
+            FROM public.weather_staging_table AS s
             JOIN dwh.dim_location AS l 
                 ON s.city = l.city AND s.country = l.country
             JOIN dwh.dim_weather_condition AS c 

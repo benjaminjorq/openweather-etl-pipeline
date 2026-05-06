@@ -157,6 +157,9 @@ def start_ingestion_process(execution_date: str):
         weather_result = get_weather_data(lat, lon)
         pollution_result = get_pollution_data(lat, lon)
 
+        # Se permite guardar registros parciales si al menos una API responde.
+        # Esto evita pérdida de datos ante fallos parciales, pero puede generar registros incompletos.
+
         if weather_result or pollution_result:
             record = {
                 "city_metadata": city,
