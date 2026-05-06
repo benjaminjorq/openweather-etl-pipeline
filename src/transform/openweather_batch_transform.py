@@ -1,3 +1,12 @@
+
+"""
+Módulo de Transformación (Silver Layer) - OpenWeather ETL.
+
+Normaliza y limpia los archivos JSON de la capa Bronze.
+Aplica reglas de calidad de datos.
+
+"""
+
 import json
 import logging
 import pandas as pd
@@ -25,32 +34,20 @@ logging.basicConfig(
     ]
 )
 
-# 3. Función para obtener archivo fuente
-
-def get_latest_bronze_file():
-    """Obtiene el archivo JSON más reciente de la capa Bronze.
-
-    Returns:
-        Path: Ruta del archivo Bronze más reciente.
-
-    Raises:
-        FileNotFoundError: Si no existen archivos en Bronze (indica fallo en la ingesta).
-    """
-    files = list(BRONZE_FOLDER.glob("*.json"))
-    if not files:
-        raise FileNotFoundError("Directorio Bronze vacío. No hay datos para transformar")
-    return max(files, key=lambda f: f.stat().st_mtime)  
-
-# 4. Función de Lógica de Negocio y Limpieza
+# 3. Función de Limpieza y Normalización
 
 def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
-    """Limpia, normaliza y valida los datos.
+    """   
+    Limpia, normaliza y valida los datos provenientes de la capa Bronze.
+
+    Aplica casting de tipos numéricos, normalización de strings,
+    conversión de fechas, eliminación de duplicados y filtros de rango.
 
     Args:
-        df (pd.DataFrame): DataFrame proveniente de Bronze.
+        df (pd.DataFrame): DataFrame con los datos crudos desde Bronze.
 
     Returns:
-        pd.DataFrame: DataFrame procesado, limpio y validado.
+        pd.DataFrame: DataFrame procesado, limpio y validado listo para Silver.
     """
 
     logging.info(f"Total de Filas antes de Transformar: {len(df)}")
@@ -72,112 +69,114 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
 
     df["processed_timestamp"] = pd.to_datetime(df["processed_timestamp"])
     
-    # Filtros de Calidad y Validación
+    # Eliminación de duplicados
 
     initial_rows = len(df)
     df = df.drop_duplicates(subset=["city", "processed_timestamp"])
     logging.info(f"Se eliminaron : {initial_rows - len(df)} filas duplicadas")
 
+    # Eliminación de valores nulos en columnas críticas
+
     rows_before_dropna = len(df)
     df = df.dropna(subset=["city", "temperature_c"])
     logging.info(f"Se eliminaron : {rows_before_dropna - len(df)} valores faltantes")
     
-    # Filtro de Rango
+    # Filtro de rango de temperatura válida (-90°C a 60°C)
 
     df = df[(df["temperature_c"] > -90) & (df["temperature_c"] < 60)]
 
     return df
 
-# 5. Proceso Principal de Transformación
+# 4. Proceso Principal de Transformación
 
-def start_transformation_process():
+def start_transformation_process(execution_date: str):
     """
-    Orquesta la extracción, aplanamiento, filtrado y particionado.
+    Función principal de transformación y limpieza.
+
+    Lee el archivo JSON de Bronze correspondiente a la fecha de ejecución,
+    aplana la estructura anidada, renombra columnas, extrae métricas de
+    polución y clima, y exporta el resultado limpio a la capa Silver
+    en formato CSV particionado por año, mes y día.
+
+    Args:
+        execution_date (str): Fecha exacta del archivo a procesar (YYYYMMDDTHHMMSS).
 
     Raises:
-        RuntimeError: Si ocurre un fallo crítico durante el proceso de transformación.
-
+        FileNotFoundError: Si el archivo Bronze correspondiente no existe.
     """
-    logging.info("Iniciando proceso de Transformación")
 
-    try:
-        file_path = get_latest_bronze_file()
-        logging.info(f"Procesando archivo: {file_path.name}")
-        
-        with open(file_path, "r", encoding="utf-8") as f:
-            raw_data = json.load(f)
+    logging.info(f"Transformando datos a Silver para la fecha: {execution_date}")
+    
+    file_path = BRONZE_FOLDER / f"raw_weather_data_{execution_date}.json"
+    execution_dt = datetime.strptime(execution_date, "%Y%m%dT%H%M%S")
 
-        if not raw_data:
-            logging.warning("El JSON está vacío.")
-            return
+    if not file_path.exists():
+        raise FileNotFoundError(f"No existe el archivo a transformar: {file_path}")
 
-        # 1. Flatten del JSON anidado
+    with open(file_path, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
 
-        df = pd.json_normalize(raw_data)
+    # 1. Aplanar el JSON anidado a estructura tabular
 
-        # 2. Renombrar columnas 
+    df = pd.json_normalize(raw_data)
+    
+    # 2. Renombrar columnas al esquema estándar del proyecto
 
-        df = df.rename(columns={
-            "city_metadata.name": "city",
-            "weather_raw_data.sys.country": "country",
-            "weather_raw_data.main.temp": "temperature_c",
-            "weather_raw_data.main.feels_like": "feels_like_c",
-            "weather_raw_data.main.humidity": "humidity_pct",
-            "weather_raw_data.main.pressure": "pressure_hpa",
-            "weather_raw_data.wind.speed": "wind_speed_ms",
-        })
+    df = df.rename(columns={
+        "city_metadata.name": "city",
+        "weather_raw_data.sys.country": "country",
+        "weather_raw_data.main.temp": "temperature_c",
+        "weather_raw_data.main.feels_like": "feels_like_c",
+        "weather_raw_data.main.humidity": "humidity_pct",
+        "weather_raw_data.main.pressure": "pressure_hpa",
+        "weather_raw_data.wind.speed": "wind_speed_ms",
+    })
 
-        # 3. Extracción del Clima
+    # 3. Extraer campos anidados en listas (clima y polución)
 
-        if "weather_raw_data.weather" in df.columns:
-            df["weather_desc"] = df["weather_raw_data.weather"].str[0].str.get("description")
+    if "weather_raw_data.weather" in df.columns:
+        df["weather_desc"] = df["weather_raw_data.weather"].str[0].str.get("description")
+    
+    if "pollution_raw_data.list" in df.columns:
+        pollution = df["pollution_raw_data.list"].str[0]
+        df["aqi"] = pollution.str["main"].str["aqi"]
+        df["co_level"] = pollution.str["components"].str["co"]
+        df["no2_level"] = pollution.str["components"].str["no2"]
+        df["pm2_5_level"] = pollution.str["components"].str["pm2_5"]
+        df["o3_level"] = pollution.str["components"].str["o3"]
+        df["pm10_level"] = pollution.str["components"].str["pm10"]
 
-        # 4. Extracción de Polución
+    df["processed_timestamp"] = execution_dt
+    
+    # 4. Reordenar columnas al esquema final
 
-        if "pollution_raw_data.list" in df.columns:
-            pollution = df["pollution_raw_data.list"].str[0] 
-            
-            df["aqi"] = pollution.str["main"].str["aqi"]
-            df["co_level"] = pollution.str["components"].str["co"]
-            df["no2_level"] = pollution.str["components"].str["no2"]
-            df["o3_level"] = pollution.str["components"].str["o3"]
-            df["pm2_5_level"] = pollution.str["components"].str["pm2_5"]
-            df["pm10_level"] = pollution.str["components"].str["pm10"]
+    target_columns = [
+        "city", "country", "temperature_c", "feels_like_c", "humidity_pct", 
+        "pressure_hpa", "wind_speed_ms", "weather_desc", "aqi", "co_level", 
+        "no2_level", "pm2_5_level", "pm10_level", "o3_level", "processed_timestamp" 
+    ]
+    
+    df = df.reindex(columns=target_columns)
+    
+    # 5. Limpieza y normalización de datos 
 
-        # 5. Timestamp del batch
+    df = clean_and_normalize(df)
 
-        df["processed_timestamp"] = datetime.now().replace(second=0, microsecond=0)
+    # 6. Guardar CSV particionado por año, mes y día (estilo Hive)
 
-        output_columns = [
-            "city", "country", "temperature_c", "feels_like_c", "humidity_pct",
-            "pressure_hpa", "wind_speed_ms", "weather_desc", "aqi", "co_level",
-            "no2_level", "o3_level", "pm2_5_level", "pm10_level", "processed_timestamp"
-        ]
-        
-        df = df.reindex(columns=output_columns)
+    output_dir = SILVER_FOLDER / f"year={execution_dt.year}" / f"month={execution_dt.month:02d}" / f"day={execution_dt.day:02d}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f"clean_weather_data_{execution_date}.csv"
+    df.to_csv(output_dir / filename, index=False)
+    logging.info(f"Guardado en Silver: {filename}")
 
-        # 6. Limpieza y validación del DataFrame
-
-        df = clean_and_normalize(df)
-        
-        if df.empty:
-            logging.warning("Todos los datos fueron filtrados por calidad.")
-            return
-
-        # 7. Particionamiento por fecha
-
-        now = datetime.now()
-        output_dir = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        filename = f"clean_weather_data_{now.strftime('%H_%M_%S')}.csv"
-        df.to_csv(output_dir / filename, index=False)
-        
-        logging.info(f"Transformación completada. CSV guardado: {filename}")
-
-    except Exception as e:
-        logging.critical(f"Fallo crítico en transformación: {e}")
-        raise RuntimeError("Error en proceso de transformación") from e
+# 5. Ejecución
 
 if __name__ == "__main__":
-    start_transformation_process()
+
+    # Prueba manual: Ejecuta la transformación directamente sin Airflow.
+    # Busca el archivo Bronze con la fecha actual y lo procesa hacia Silver.
+
+    test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
+    start_transformation_process(execution_date=test_date)

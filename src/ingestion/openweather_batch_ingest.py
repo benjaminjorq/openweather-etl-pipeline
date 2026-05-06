@@ -1,3 +1,13 @@
+
+"""
+Módulo de Ingesta (Bronze Layer) - OpenWeather ETL.
+
+Responsable de extraer datos meteorológicos y de contaminación desde la API 
+de OpenWeather para una lista de ciudades configuradas (cities.yaml).
+Los datos crudos se almacenan en formato JSON en la capa Bronze.
+
+"""
+
 import requests
 import json
 import logging
@@ -41,7 +51,7 @@ def load_cities_config():
         list[dict]: Lista de diccionarios con las claves 'name', 'lat' y 'lon'.
 
     Raises:
-        FileNotFoundError: Si el archivo no existe.
+        FileNotFoundError: Si el archivo cities.yaml no existe.
         RuntimeError: Si ocurre un error al leer el archivo.
     """
 
@@ -115,50 +125,21 @@ def get_pollution_data(lat:float, lon:float):
         logging.error(f"API Air Pollution - Error de conexión: {e}")
         return None
 
-# 6. Función: Guardar en Bronze
+# 6. Proceso Principal
 
-def save_to_bronze(data_buffer):
-    """
-    Guarda datos crudos en la capa Bronze como archivo JSON.
-
-    Genera un archivo con timestamp único para mantener histórico de datos
-    sin sobrescribir ejecuciones anteriores.
-
-    Args:
-        data_buffer (list[dict]): Lista de registros recolectados desde las APIs.
-
-    Returns:
-        None
-
-    Raises:
-        RuntimeError: Si ocurre un error al guardar el archivo.
-    """
-    try:
-        timestamp_str = datetime.now().strftime('%Y_%m_%d_%H%M%S')
-        filename = f"raw_weather_data_{timestamp_str}.json"
-        output_path = BRONZE_FOLDER / filename
-        
-        with open(output_path, "w", encoding="utf-8") as file:
-            json.dump(data_buffer, file, indent=2)
-            
-        logging.info(f"Archivo guardado exitosamente: {filename}")
-
-    except Exception as e:
-
-        logging.critical(f"Error en guardado: {e}")
-        raise RuntimeError("Error guardando archivo en Bronze") from e
-
-# 7. Proceso Principal
-
-def start_ingestion_process():
+def start_ingestion_process(execution_date: str):
     """
     Ejecuta el proceso de ingesta de datos desde APIs externas hacia la capa Bronze.
 
+    Args:
+        execution_date (str): Fecha de ejecución lógica en formato 'YYYYMMDDTHHMMSS'.
+
     Raises:
-        RuntimeError: Si la API Key no está definida.
+        RuntimeError: Si la variable de entorno OPENWEATHER_API_KEY no está configurada o no existe.
     """
 
     logging.info("Iniciando proceso de Ingesta")
+
     if not API_KEY:
         logging.critical("API Key no definida.")
         raise RuntimeError("Falta OPENWEATHER_API_KEY")
@@ -176,10 +157,10 @@ def start_ingestion_process():
         weather_result = get_weather_data(lat, lon)
         pollution_result = get_pollution_data(lat, lon)
 
-        if weather_result and pollution_result:
+        if weather_result or pollution_result:
             record = {
                 "city_metadata": city,
-                "ingestion_timestamp": datetime.now().isoformat(),
+                "ingestion_timestamp": execution_date,
                 "weather_raw_data": weather_result,  
                 "pollution_raw_data": pollution_result 
             }
@@ -187,12 +168,20 @@ def start_ingestion_process():
         else:
             logging.warning(f"Datos incompletos para {name}. Se omite registro.")
 
-    # 8. Guardado
-
     if raw_data_buffer:
-        save_to_bronze(raw_data_buffer)
-    else:
-        logging.warning("No se generaron datos para guardar.")
+        filename = f"raw_weather_data_{execution_date}.json"
+        output_path = BRONZE_FOLDER / filename
+        with open(output_path, "w", encoding="utf-8") as file:
+            json.dump(raw_data_buffer, file, indent=2)
+
+        logging.info(f"Archivo guardado en Bronze: {filename}")
+
+    # 7. Ejecución
 
 if __name__ == "__main__":
-    start_ingestion_process()
+
+    # Prueba manual: Ejecuta la ingesta directamente sin Airflow.
+    # Genera la fecha actual y descarga los datos de la API hacia Bronze.
+
+    test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
+    start_ingestion_process(execution_date=test_date)

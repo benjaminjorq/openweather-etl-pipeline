@@ -1,3 +1,14 @@
+
+"""
+Módulo de Carga (Gold Layer) - OpenWeather ETL.
+
+Lee el archivo CSV de la capa Silver correspondiente a la fecha de ejecución
+y lo carga a PostgreSQL. Primero inserta los datos en una tabla de staging,
+luego ejecuta las transformaciones SQL hacia el Data Warehouse en esquema estrella.
+
+"""
+
+
 import pandas as pd
 import logging
 import os
@@ -26,10 +37,11 @@ logging.basicConfig(
     ]
 )
 
-# 3. Configuración de conexión DB
+# 3. Configuración de Conexión a la Base de Datos
 
 def create_db_engine():
-    """Crea la conexión SQLAlchemy usando credenciales seguras.
+    """
+    Crea el motor de conexión SQLAlchemy usando credenciales desde variables de entorno.
 
     Returns:
         Engine: Objeto engine de conexión a PostgreSQL.
@@ -52,36 +64,40 @@ def create_db_engine():
         logging.critical(f"Error configurando motor de base de datos: {e}")
         raise RuntimeError(f"No se pudo establecer la conexión a la base de datos: {e}")
 
-# 4. Obtención de archivo Silver particionado (más reciente)
+# 4. Obtención del Archivo Silver Particionado
 
-def get_latest_silver_file():
-    """Obtiene el archivo CSV más reciente de la capa Silver del día actual.
+def get_target_silver_file(execution_date: str):
+    """
+    Obtiene el archivo CSV de la capa Silver correspondiente a la fecha de ejecución.
+
+    Args:
+        execution_date (str): Fecha lógica YYYYMMDDTHHMMSS.
 
     Returns:
-        Path: Ruta del archivo CSV a cargar.
+        Path: Ruta exacta del archivo CSV a cargar.
 
     Raises:
-        FileNotFoundError: Si no se encuentra la partición o está vacía.
+        FileNotFoundError: Si no se encuentra la partición o el archivo.
     """
-    now = datetime.now()
-    todays_path = SILVER_FOLDER / f"year={now.year}" / f"month={now.month:02d}" / f"day={now.day:02d}"
 
-    if not todays_path.exists():
-        logging.warning("No se encontró carpeta Silver del día actual.")
-        raise FileNotFoundError("No se encontró la partición Silver del día actual")
-    
-    files = list(todays_path.glob("clean_weather_data_*.csv"))
-    if not files:
-        logging.error(f"Carpeta de partición vacía en: {todays_path}")
-        raise FileNotFoundError("La carpeta del día no contiene archivos CSV.")
+    execution_dt = datetime.strptime(execution_date, "%Y%m%dT%H%M%S")
+    target_path = SILVER_FOLDER / f"year={execution_dt.year}" / f"month={execution_dt.month:02d}" / f"day={execution_dt.day:02d}" / f"clean_weather_data_{execution_date}.csv"
+
+    if not target_path.exists():
+        logging.warning(f"No se encontró el archivo particionado: {target_path}")
+        raise FileNotFoundError(f"Falta el archivo Silver para la fecha {execution_date}")
         
-    return max(files, key=lambda f: f.stat().st_mtime)
+    return target_path
 
-# 5. Carga de datos a Gold
+# 5. Carga a Staging y Traspaso al Data Warehouse
 
 def load_to_gold(df: pd.DataFrame, engine) -> None:
     """
-    Carga datos en la tabla staging y ejecuta transformaciones hacia la capa Gold.
+    Carga los datos en la tabla de staging y ejecuta las transformaciones SQL
+    hacia las tablas del Data Warehouse en esquema estrella.
+
+    El proceso inserta primero en staging, luego actualiza las dimensiones
+    (location, weather_condition, time) y finalmente la tabla de hechos.
 
     Args:
         df (pd.DataFrame): Datos procesados desde la capa Silver.
@@ -90,8 +106,10 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
     Raises:
         RuntimeError: Si ocurre un error durante la carga o transformación.
     """
+
     with engine.begin() as connection:
-        df.to_sql(name="weather_silver_table", con=connection, if_exists="replace", index=False, schema="public", method="multi")
+
+        df.to_sql(name="weather_silver_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
 
         logging.info(f"Carga a Staging exitosa: {len(df)} registros insertados.")
         logging.info("Actualizando datos en Gold")
@@ -108,14 +126,13 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
             ON CONFLICT (description) DO NOTHING;
 
             -- 3. Actualizar Dimensión Time
-            INSERT INTO dwh.dim_time (full_date, hour, day, month, year, is_weekend)
+            INSERT INTO dwh.dim_time (full_date, hour, day, month, year)
             SELECT DISTINCT 
                 processed_timestamp::TIMESTAMP,
                 EXTRACT(HOUR FROM processed_timestamp::TIMESTAMP),
                 EXTRACT(DAY FROM processed_timestamp::TIMESTAMP),
                 EXTRACT(MONTH FROM processed_timestamp::TIMESTAMP),
-                EXTRACT(YEAR FROM processed_timestamp::TIMESTAMP),
-                CASE WHEN EXTRACT(ISODOW FROM processed_timestamp::TIMESTAMP) IN (6, 7) THEN TRUE ELSE FALSE END
+                EXTRACT(YEAR FROM processed_timestamp::TIMESTAMP)
             FROM public.weather_silver_table
             ON CONFLICT (full_date) DO NOTHING;
 
@@ -145,20 +162,23 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
 
 # 6. Orquestador del pipeline
 
-def start_database_load():
+def start_database_load(execution_date: str):
     """
-    Ejecuta el proceso de carga de datos desde la capa Silver hacia PostgreSQL.
+    Ejecuta el proceso completo de carga desde la capa Silver hacia PostgreSQL.
+
+    Args:
+        execution_date (str): Fecha de ejecución lógica en formato YYYYMMDDTHHMMSS.
 
     Raises:
-        RuntimeError: Si no hay datos disponibles o falla el pipeline.
+        RuntimeError: Si no hay datos disponibles o falla alguna etapa del pipeline.
     """
     logging.info("Iniciando proceso de carga a PostgreSQL")
     
     try:
-        latest_csv = get_latest_silver_file()
-        logging.info(f"Cargando archivo: {latest_csv.name}")
+        target_csv = get_target_silver_file(execution_date)
+        logging.info(f"Cargando archivo: {target_csv.name}")
 
-        df = pd.read_csv(latest_csv)
+        df = pd.read_csv(target_csv)
         
         if df.empty:
             logging.warning("El archivo CSV está vacío.")
@@ -175,7 +195,13 @@ def start_database_load():
         logging.critical("Fallo durante el proceso de carga.")
         raise RuntimeError("Falla en la etapa de carga.") from e
     
-# 7. Ejecución de Carga en BD
+# 7. Ejecución 
 
 if __name__ == "__main__":
-    start_database_load()
+
+    # Prueba manual: Ejecuta la carga directamente sin Airflow.
+    # Busca el archivo Silver con la fecha actual y lo inserta en PostgreSQL.
+
+    test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
+    start_database_load(execution_date=test_date)
+

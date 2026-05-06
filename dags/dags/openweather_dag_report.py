@@ -22,16 +22,16 @@ with DAG(
     description='Generación de Ranking y Reportes (Capa Gold)',
     schedule_interval='50 23 * * *',
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"),
-    catchup=False,
+    catchup=True,
     tags=['OpenWeather Gold'],
+) as dag:
 
 # 3. Definición de Tarea
 
     # 3.1 Reportes: Genera Ranking y Promedios por Pais
 
-) as dag:
-
     t1_daily_report = PythonOperator(
         task_id='generate_daily_gold_report',
-        python_callable=create_gold_reports
+        python_callable=create_gold_reports,
+        op_kwargs={'execution_date_short': '{{ ds_nodash }}'}
     )

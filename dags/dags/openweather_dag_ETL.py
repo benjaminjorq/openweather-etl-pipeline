@@ -26,7 +26,7 @@ with DAG(
     description='ETL Clima Chile: Arquitectura Medallion con carga a PostgreSQL',
     schedule_interval='0 * * * *', 
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"), # Hora local de Chile
-    catchup=False,
+    catchup=True,
     tags=['OpenWeather Extract-Transform-Load'],
 ) as dag:
 
@@ -36,21 +36,25 @@ with DAG(
 
     t1_ingest = PythonOperator(
         task_id='1_ingest_bronze_data',
-        python_callable=start_ingestion_process
+        python_callable=start_ingestion_process,
+        op_kwargs={'execution_date': '{{ ts_nodash }}'}
+
     )
 
     # 3.2 Transformación: Limpia los datos con Pandas
 
     t2_transform = PythonOperator(
         task_id='2_transform_to_silver',
-        python_callable=start_transformation_process
+        python_callable=start_transformation_process,
+        op_kwargs={'execution_date': '{{ ts_nodash }}'}
     )
 
     # 3.3 Carga: Inserta los datos limpios en PostgreSQL
 
     t3_load = PythonOperator(
         task_id='3_load_to_database',
-        python_callable=start_database_load
+        python_callable=start_database_load,
+        op_kwargs={'execution_date': '{{ ts_nodash }}'}
     )
 
 # 4. Configuración de Dependencias
