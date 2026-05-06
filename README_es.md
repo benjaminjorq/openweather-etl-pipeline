@@ -135,9 +135,9 @@ Para realizar consultas analíticas, los datos planos de la capa Silver se trans
 Esta arquitectura separa lo descriptivo de las métricas cuantitativas, garantizando la integridad referencial y optimizando la base de datos para herramientas de Business Intelligence (BI).
 
 <div align="center">
-<img width="1156" height="528" alt="erd white" src=<img width="1091" height="704" alt="erd white" src="https://github.com/user-attachments/assets/fc531fd3-0b4a-4ec6-b25a-81ae78b6fe15" />
+  <img width="1091" height="704" alt="erd white" src="https://github.com/user-attachments/assets/fc531fd3-0b4a-4ec6-b25a-81ae78b6fe15" />
   <br>
-  <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em><br>
+  <em>Diagrama Entidad-Relación (ERD) generado desde PostgreSQL mostrando las Primary Keys y Foreign Keys.</em>
   <br>
 </div>
 
