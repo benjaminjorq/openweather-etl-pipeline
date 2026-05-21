@@ -1,10 +1,7 @@
 import os
 import requests
 import logging
-from dotenv import load_dotenv
 
-
-load_dotenv()
 
 def send_discord_failure_alert(context: dict) -> None:
     """
@@ -39,7 +36,7 @@ def send_discord_failure_alert(context: dict) -> None:
         task_instance = context.get('task_instance')
         task_id = task_instance.task_id
         dag_id = task_instance.dag_id
-        execution_date = context.get('execution_date').strftime("%Y-%m-%d %H:%M:%S")
+        execution_date = str(context.get('logical_date', context.get('execution_date')))
         log_url = task_instance.log_url
 
         # 2. Mensaje de alerta al canal de Discord

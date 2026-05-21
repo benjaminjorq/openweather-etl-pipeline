@@ -16,6 +16,7 @@ x-airflow-common:
     TZ: "America/Santiago"
     AIRFLOW__CORE__DEFAULT_TIMEZONE: "America/Santiago"
     OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
     DB_USER: ${POSTGRES_USER}
     DB_PASSWORD: ${POSTGRES_PASSWORD}
     DB_HOST: postgres
