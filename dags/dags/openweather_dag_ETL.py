@@ -5,6 +5,7 @@ from airflow.operators.python import PythonOperator
 from src.ingestion.openweather_batch_ingest import start_ingestion_process
 from src.transform.openweather_batch_transform import start_transformation_process
 from src.load.openweather_load_database import start_database_load
+from src.utils.alerts import send_discord_failure_alert
 
 
 # 1. Definición de Argumentos por Defecto 
@@ -16,6 +17,7 @@ default_args = {
     'email_on_retry': False,
     'retries': 1, 
     'retry_delay': timedelta(minutes=5), 
+    'on_failure_callback': send_discord_failure_alert,
 }
 
 # 2. DAG
@@ -26,7 +28,7 @@ with DAG(
     description='ETL Clima Chile: Arquitectura Medallion con carga a PostgreSQL',
     schedule_interval='0 * * * *', 
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"), # Hora local de Chile
-    catchup=True,
+    catchup=False,
     tags=['OpenWeather Extract-Transform-Load'],
 ) as dag:
 

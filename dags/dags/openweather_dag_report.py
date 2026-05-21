@@ -3,6 +3,7 @@ import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from src.reports_to_gold.openweather_gold_report import create_gold_reports
+from src.utils.alerts import send_discord_failure_alert
 
 
 # 1. Definición de Argumentos por Defecto 
@@ -12,6 +13,7 @@ default_args = {
     'depends_on_past': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
+    'on_failure_callback': send_discord_failure_alert,
 }
 
 # 2. DAG
@@ -22,7 +24,7 @@ with DAG(
     description='Generación de Ranking y Reportes (Capa Gold)',
     schedule_interval='50 23 * * *',
     start_date=pendulum.datetime(2026, 1, 1, tz="America/Santiago"),
-    catchup=True,
+    catchup=False,
     tags=['OpenWeather Gold'],
 ) as dag:
 
