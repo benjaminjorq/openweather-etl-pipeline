@@ -457,16 +457,16 @@ Antes de comenzar, asegúrate de tener instalado:
 
 Abre tu navegador y dirígete a:
 
-```text
+    ```bash
     http://localhost:8080
-```
+    ```
 
 Credenciales por defecto:
 
-```text
+    ```bash
     Usuario: airflow
     Contraseña: airflow
-```
+    ```
 ---
 
 ## 📂 Estructura del Repositorio
