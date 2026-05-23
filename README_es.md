@@ -328,6 +328,22 @@ Se diseñó un DAG aislado que se ejecuta una sola vez al final del día (23:50 
   <em>Vista del DAG de reportes: Ejecución exitosa de la etapa de Reporteria.</em>
 </p>
 
+### 3. Observabilidad y Alertas en Tiempo Real (Discord Webhooks)
+
+Para garantizar una respuesta rápida ante problemas de infraestructura o datos (como límites de la API o caídas en la conexión a la base de datos), el pipeline implementa un sistema de alertas en tiempo real mediante **Discord Webhooks**.
+
+Aprovechando el callback `on_failure_callback` de Airflow, cualquier tarea que falle genera automáticamente una notificación en un canal dedicado de Discord. La alerta proporciona contexto inmediato, incluyendo el nombre del DAG, la tarea específica que falló, la hora de ejecución y un enlace directo a los logs de Airflow para facilitar el debugging.
+
+<p align="center">
+  <img 
+    width="800" 
+    alt="discord alert screenshot" 
+    src="https://github.com/user-attachments/assets/c1fd8266-adf8-47f9-a1fe-bf15a4da6b98"
+  />
+  <br>
+  <em>Alerta en Discord: notificación en tiempo real mostrando una falla simulada dentro del pipeline.</em>
+</p>
+
 ---
 
 ## Pruebas Unitarias (Testing)
@@ -442,28 +458,38 @@ Antes de comenzar, asegúrate de tener instalado:
 
 ```bash
 openweather-etl-pipeline/
-├── config/              # Configuraciones (YAML)
-├── dags/                # Orquestación (DAGs de Airflow)
-├── data/                # Data Lake Local (Excluido de git)
-│   ├── bronze/          # Raw JSONs
-│   ├── silver/          # Datos Limpios (Particionados)
+├── config/                                 # Archivos de configuración (YAML)
+│   └── cities.yaml                         # Configuración de ciudades objetivo
+├── dags/                                   # Orquestación (DAGs de Airflow)
+├── data/                                   # Data Lake local (Excluido de git)
+│   ├── bronze/                             # JSONs sin procesar
+│   ├── silver/                             # Datos limpios (Particionados)
 │   │   └── year=YYYY/month=MM/day=DD/
-│   └── gold/            # Reportes de Negocio
-│       ├── ranking/     # Top contaminación (.csv)
-│       └── summary/     # Promedios por país (.csv)
-├── src/                 # Código fuente modular
-│   ├── ingestion/       # batch_ingest.py
-│   ├── transform/       # batch_transform.py
-│   ├── load/            # load_database.py
-│   └── reports_to_gold/ # gold_report.py
-├── pytests/             # Pruebas unitarias
-├── Dockerfile           # Imagen del entorno
-├── docker-compose.yml   # Configuración Docker
-├── pytest.ini           # Configuracion de pruebas
-├── README.md            # Documentacion principal (English)
-├── README_es.md         # Documentacion en Español
-├── .gitignore           # Archivos excluidos del control de versiones
-└── requirements.txt     # Dependencias de Python
+│   └── gold/                               # Reportes de negocio
+│       ├── ranking/                        # Ranking de contaminación (.csv)
+│       └── summary/                        # Promedios por país (.csv)
+├── logs/                                   # Logs de Airflow y del pipeline (Excluido de git)
+├── src/                                    # Código fuente modular
+│   ├── ingestion/               
+│   │   └── openweather_batch_ingest.py     # Extracción de API e ingesta raw
+│   ├── transform/               
+│   │   └── openweather_batch_transform.py  # Lógica de limpieza y normalización
+│   ├── load/                    
+│   │   └── openweather_load_database.py    # Proceso de carga en PostgreSQL
+│   ├── reports_to_gold/         
+│   │   └── openweather_gold_report.py      # Agregaciones y reportes de negocio
+│   └── utils/                   
+│       └── alerts.py                       # Integración de alertas con Discord Webhooks
+├── pytests/                                # Pruebas unitarias
+│   └── test_transform.py                   # Pruebas de calidad de datos y limpieza
+├── Dockerfile                              # Imagen de entorno
+├── docker-compose.yml                      # Configuración de Docker
+├── pytest.ini                              # Configuración de Pytest
+├── README.md                               # Documentación principal (Inglés)
+├── README_es.md                            # Documentación en español
+├── .gitignore                              # Archivos excluidos del control de versiones
+├── .env                                    # Credenciales locales (Excluido de git)
+└── requirements.txt                        # Dependencias de Python
 
 ```
 ---
