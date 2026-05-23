@@ -330,6 +330,23 @@ A separate DAG was designed to run once at the end of the day (23:50). Its purpo
   <em>Reporting DAG view: Successful execution of the Reporting stage.</em>
 </p>
 
+### 3. Observability & Real-Time Alerting (Discord Webhooks)
+
+To ensure rapid response to infrastructure or data issues (such as API rate limits or database connection drops), the pipeline implements a real-time alerting system using **Discord Webhooks**. 
+
+By leveraging Airflow's `on_failure_callback`, any failed task automatically triggers a notification to a dedicated Discord channel. The alert provides immediate context, including the DAG name, the specific task that failed, the execution time, and a direct link to the Airflow logs for quick debugging.
+
+<p align="center">
+  <img 
+    width="800" 
+    alt="discord alert screenshot" 
+    src="https://github.com/user-attachments/assets/c1fd8266-adf8-47f9-a1fe-bf15a4da6b98"
+  />
+  <br>
+  <em>Discord Alert: Real-time notification detailing a simulated task failure in the pipeline.</em>
+</p>
+
+
 ---
 
 ## Unit Testing
@@ -521,28 +538,38 @@ Before getting started, make sure you have installed:
 
 ```bash
 openweather-etl-pipeline/
-├── config/              # Configuration files (YAML)
-├── dags/                # Orchestration (Airflow DAGs)
-├── data/                # Local Data Lake (Excluded from git)
-│   ├── bronze/          # Raw JSONs
-│   ├── silver/          # Clean Data (Partitioned)
+├── config/                                 # Configuration files (YAML)
+│   └── cities.yaml                         # Target locations configuration
+├── dags/                                   # Orchestration (Airflow DAGs)
+├── data/                                   # Local Data Lake (Excluded from git)
+│   ├── bronze/                             # Raw JSONs
+│   ├── silver/                             # Clean Data (Partitioned)
 │   │   └── year=YYYY/month=MM/day=DD/
-│   └── gold/            # Business Reports
-│       ├── ranking/     # Top pollution (.csv)
-│       └── summary/     # Country averages (.csv)
-├── src/                 # Modular source code
-│   ├── ingestion/       # batch_ingest.py
-│   ├── transform/       # batch_transform.py
-│   ├── load/            # load_database.py
-│   └── reports_to_gold/ # gold_report.py
-├── pytests/             # Unit tests
-├── Dockerfile           # Environment image
-├── docker-compose.yml   # Docker configuration
-├── pytest.ini           # Test configuration
-├── README.md            # Main documentation (English)
-├── README_es.md         # Spanish documentation
-├── .gitignore           # Files excluded from version control
-└── requirements.txt     # Python dependencies
+│   └── gold/                               # Business Reports
+│       ├── ranking/                        # Top pollution (.csv)
+│       └── summary/                        # Country averages (.csv)
+├── logs/                                   # Airflow and pipeline logs (Excluded from git)
+├── src/                                    # Modular source code
+│   ├── ingestion/               
+│   │   └── openweather_batch_ingest.py     # API extraction and raw ingestion
+│   ├── transform/               
+│   │   └── openweather_batch_transform.py  # Cleaning and normalization logic
+│   ├── load/                    
+│   │   └── openweather_load_database.py    # PostgreSQL loading process
+│   ├── reports_to_gold/         
+│   │   └── openweather_gold_report.py      # Aggregations and business reports
+│   └── utils/                   
+│       └── alerts.py                       # Discord webhook integration
+├── pytests/                                # Unit tests
+│   └── test_transform.py                   # Data quality and cleaning tests
+├── Dockerfile                              # Environment image
+├── docker-compose.yml                      # Docker configuration
+├── pytest.ini                              # Test configuration
+├── README.md                               # Main documentation (English)
+├── README_es.md                            # Spanish documentation
+├── .gitignore                              # Files excluded from version control
+├── .env                                    # Local credentials (Excluded from git)
+└── requirements.txt                        # Python dependencies
 ```
 
 ---
@@ -551,7 +578,6 @@ openweather-etl-pipeline/
 
 These improvements reflect a natural evolution from a local environment toward a more production-ready pipeline, prioritizing scalability, observability, and data quality.
 
-- **Observability:** Failure alerting via Airflow callbacks (Slack/Email integrations)
 - **Config:** Validation of the `cities.yaml` file to ensure configuration integrity and consistency.
 - **Storage Optimization:** Migration of the Silver layer from CSV to columnar format (Parquet) for improved performance and efficiency.
 - **Scalability:** Deployment in cloud environments (AWS/GCP) and adaptation to distributed processing with Apache Spark.
