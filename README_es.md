@@ -426,47 +426,47 @@ Antes de comenzar, asegúrate de tener instalado:
 
 ## Configuración e Instalación
 
-1.  **Clonar el repositorio:**
+1. **Clonar el repositorio:**
 
-    ```bash
-    git clone https://github.com/benjaminjorq/openweather-etl-pipeline.git
-    cd openweather-etl-pipeline
-    ```
+```bash
+git clone https://github.com/benjaminjorq/openweather-etl-pipeline.git
+cd openweather-etl-pipeline
+```
 
-2.  **Configurar variables de entorno:**
+2. **Configurar variables de entorno:**
 
-    Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales (puedes usar el archivo `.env.example` como guía):
-    ```env
-    AIRFLOW_UID=50000
-    OPENWEATHER_API_KEY=tu_api_key_aqui
-    POSTGRES_USER=airflow
-    POSTGRES_PASSWORD=airflow
-    POSTGRES_DB=weather_db
+Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales (puedes usar el archivo `.env.example` como guía):
 
-    ```
+```env
+AIRFLOW_UID=50000
+OPENWEATHER_API_KEY=tu_api_key_aqui
+POSTGRES_USER=airflow
+POSTGRES_PASSWORD=airflow
+POSTGRES_DB=weather_db
+```
 
-3.  **Iniciar los servicios:**
+3. **Iniciar los servicios:**
 
-    Ejecuta el siguiente comando para levantar Airflow y PostgreSQL:
-    
-    ```bash
-    docker-compose up -d
-    ```
+Ejecuta el siguiente comando para levantar Airflow y PostgreSQL:
+
+```bash
+docker-compose up -d
+```
 
 4. **Acceder a la interfaz de Airflow:**
 
 Abre tu navegador y dirígete a:
 
-    ```bash
-    http://localhost:8080
-    ```
+```text
+http://localhost:8080
+```
 
 Credenciales por defecto:
 
-    ```bash
-    Usuario: airflow
-    Contraseña: airflow
-    ```
+```text
+Usuario: airflow
+Contraseña: airflow
+```
 ---
 
 ## 📂 Estructura del Repositorio
