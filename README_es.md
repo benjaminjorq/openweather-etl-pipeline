@@ -452,6 +452,21 @@ Antes de comenzar, asegúrate de tener instalado:
     ```bash
     docker-compose up -d
     ```
+
+4. **Acceder a la interfaz de Airflow:**
+
+Abre tu navegador y dirígete a:
+
+```text
+    http://localhost:8080
+```
+
+Credenciales por defecto:
+
+```text
+    Usuario: airflow
+    Contraseña: airflow
+```
 ---
 
 ## 📂 Estructura del Repositorio
