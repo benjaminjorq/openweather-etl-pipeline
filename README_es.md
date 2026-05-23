@@ -513,7 +513,6 @@ openweather-etl-pipeline/
 
 Estas mejoras reflejan una evolución natural desde un entorno local hacia un pipeline más cercano a producción, priorizando escalabilidad, observabilidad y calidad de datos.
 
-- **Observabilidad:** Implementación de alertas ante fallos (Slack/Email) en Apache Airflow.
 - **Configuración:** Validación del archivo `cities.yaml` para asegurar integridad y consistencia de configuración.
 - **Optimización de Almacenamiento:** Migración de la capa Silver desde CSV a formato columnar (Parquet) para mejorar performance y eficiencia.
 - **Escalabilidad:** Despliegue en entornos cloud (AWS/GCP) y adaptación a procesamiento distribuido con Apache Spark.
