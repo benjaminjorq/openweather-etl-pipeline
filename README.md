@@ -532,6 +532,21 @@ Before getting started, make sure you have installed:
     docker-compose up -d
 ```
 
+4. **Access the Airflow UI**
+
+Open your browser and go to:
+
+```text
+http://localhost:8080
+```
+
+Default credentials:
+
+```text
+Username: airflow
+Password: airflow
+```
+
 ---
 
 ## 📂 Repository Structure
