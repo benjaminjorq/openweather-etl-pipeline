@@ -573,6 +573,8 @@ openweather-etl-pipeline/
 │   │   └── openweather_load_database.py    # PostgreSQL loading process
 │   ├── reports_to_gold/         
 │   │   └── openweather_gold_report.py      # Aggregations and business reports
+│   ├── validations/             
+│   │   └── data_quality.py                 # Business rules, schema validation and data quality
 │   └── utils/                   
 │       └── alerts.py                       # Discord webhook integration
 ├── pytests/                                # Unit tests

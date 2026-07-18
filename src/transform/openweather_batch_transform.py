@@ -41,10 +41,10 @@ def cast_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
     Convierte las columnas de texto a tipo numérico (float).
     
     Args:
-        df (pd.DataFrame): DataFrame original crudo.
+        df (pd.DataFrame): DataFrame con los datos crudos desde Bronze.
         
     Returns:
-        pd.DataFrame: DataFrame con métricas numéricas convertidas.
+        pd.DataFrame: DataFrame procesado, limpio y validado listo para Silver.
     """
     df["temperature_c"] = pd.to_numeric(df["temperature_c"], "coerce")
     df["humidity_pct"] = pd.to_numeric(df["humidity_pct"], "coerce")
@@ -54,7 +54,7 @@ def cast_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def normalize_string_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Limpia los espacios en las cadenas, capitaliza y rellena nulos inofensivos.
+    Limpia los espacios en las cadenas, capitaliza y rellena nulos con "Unknown"
     
     Args:
         df (pd.DataFrame): DataFrame con textos crudos.
@@ -76,7 +76,7 @@ def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
         df (pd.DataFrame): DataFrame con fechas texto.
         
     Returns:
-        pd.DataFrame: DataFrame con la columna temporal como datetime.
+        pd.DataFrame: DataFrame con la columna de fecha en formato datetime (tipo).
     """
     df["processed_timestamp"] = pd.to_datetime(df["processed_timestamp"])
 
@@ -89,7 +89,7 @@ def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
     Estandariza los tipos de datos y formatos del DataFrame (Transformación Pura).
     
     Args:
-        df (pd.DataFrame): DataFrame estructurado desde Bronze.
+        df (pd.DataFrame): DataFrame desde Bronze.
         
     Returns:
         pd.DataFrame: DataFrame listo para auditoría de calidad.
@@ -157,7 +157,7 @@ def start_transformation_process(execution_date: str):
     ]
     df = df.reindex(columns=expected_columns)
 
-    # Sanity Checks
+    # Validación del esquema y volumen del df
 
     validate_schema_and_volume(df, expected_columns)
     
@@ -166,7 +166,7 @@ def start_transformation_process(execution_date: str):
     logging.info(f"Total de Filas antes de Transformar: {len(df)}")
     logging.info(f"Tipos de Datos antes de Transformar:\n{df.dtypes}")
 
-    # Transformación técnica
+    # Transformación de datos
 
     df = clean_and_normalize(df)
 
@@ -190,6 +190,6 @@ if __name__ == "__main__":
 
     # Prueba manual: Ejecuta la transformación directamente sin Airflow.
     # Busca el archivo Bronze con la fecha actual y lo procesa hacia Silver.
-    
+
     test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
     start_transformation_process(test_date)
