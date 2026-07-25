@@ -15,7 +15,7 @@ def validate_schema_and_volume(df: pd.DataFrame, required_columns: list) -> None
     Sanity Check: Valida que el df no esté vacío y contenga todas las columnas esperadas.
     
     Args:
-        df (pd.DataFrame): DataFrame a evaluar.
+        df (pd.DataFrame): DataFrame original.
         required_columns (list): Lista de columnas que deben existir.
         
     Raises:
@@ -97,12 +97,12 @@ def apply_data_quality(df: pd.DataFrame) -> pd.DataFrame:
     Aplica secuencialmente las reglas de calidad de datos y audita los registros descartados.
     
     Args:
-        df (pd.DataFrame): DataFrame técnico estandarizado.
+        df (pd.DataFrame): DataFrame original.
         
     Returns:
         pd.DataFrame: DataFrame final tras pasar las reglas de negocio.
     """
-    logging.info("Iniciando validaciones de Calidad de Datos (Data Quality)...")
+    logging.info("Iniciando validaciones de Calidad de Datos")
     
     # 1. Duplicados Exactos
 
