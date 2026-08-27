@@ -6,8 +6,6 @@ from src.reports_to_gold.openweather_gold_report import create_gold_reports
 from src.utils.alerts import send_discord_failure_alert
 
 
-# 1. Definición de Argumentos por Defecto 
-
 default_args = {
     'owner': 'benjamin_jorquera',
     'depends_on_past': False,
@@ -15,8 +13,6 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
     'on_failure_callback': send_discord_failure_alert,
 }
-
-# 2. DAG
 
 with DAG(
     dag_id='openweather_daily_report',
@@ -27,10 +23,6 @@ with DAG(
     catchup=False,
     tags=['OpenWeather Gold'],
 ) as dag:
-
-# 3. Definición de Tarea
-
-    # 3.1 Reportes: Genera Ranking y Promedios por Pais
 
     t1_daily_report = PythonOperator(
         task_id='generate_daily_gold_report',

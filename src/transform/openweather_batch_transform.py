@@ -1,10 +1,3 @@
-"""
-Módulo de Transformación (Silver Layer) - OpenWeather ETL.
-
-Normaliza y limpia los archivos JSON de la capa Bronze.
-Aplica reglas de calidad de datos.
-
-"""
 
 import json
 import logging
@@ -13,8 +6,6 @@ from datetime import datetime
 from pathlib import Path
 from src.validations.data_quality import (validate_schema_and_volume,apply_data_quality)
 
-# 1. Configuración de Rutas
-
 BASE_DIR = Path("/opt/airflow")
 LOG_DIR = BASE_DIR / "logs"
 BRONZE_FOLDER = BASE_DIR / "data/bronze"
@@ -22,8 +13,6 @@ SILVER_FOLDER = BASE_DIR / "data/silver"
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 SILVER_FOLDER.mkdir(parents=True, exist_ok=True)
-
-# 2. Configuración de Logs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,75 +23,41 @@ logging.basicConfig(
     ]
 )
 
-# 3. Funciones Privadas de Transformación Técnica
+def cast_numeric_columns(df):
+    """Convierte las columnas de texto a tipo numérico (float). """
 
-def cast_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Convierte las columnas de texto a tipo numérico (float).
-    
-    Args:
-        df (pd.DataFrame): DataFrame con los datos crudos desde Bronze.
-        
-    Returns:
-        pd.DataFrame: DataFrame procesado, limpio y validado listo para Silver.
-    """
     df["temperature_c"] = pd.to_numeric(df["temperature_c"], "coerce")
     df["humidity_pct"] = pd.to_numeric(df["humidity_pct"], "coerce")
     df["wind_speed_ms"] = pd.to_numeric(df["wind_speed_ms"], "coerce")
 
     return df
 
-def normalize_string_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Limpia los espacios en las cadenas, capitaliza y rellena nulos con "Unknown"
-    
-    Args:
-        df (pd.DataFrame): DataFrame con textos crudos.
-        
-    Returns:
-        pd.DataFrame: DataFrame con strings formateados.
-    """
+def normalize_string_columns(df):
+    """Limpia los espacios en las cadenas, capitaliza y rellena nulos con "Unknown"""
+
     df["city"] = df["city"].astype(str).str.strip()
     df["country"] = df["country"].fillna("Unknown").astype(str).str.strip()
     df["weather_desc"] = df["weather_desc"].fillna("").astype(str).str.strip().str.capitalize()
 
     return df
 
-def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Convierte la fecha de procesamiento de string a datetime de Pandas.
-    
-    Args:
-        df (pd.DataFrame): DataFrame con fechas texto.
-        
-    Returns:
-        pd.DataFrame: DataFrame con la columna de fecha en formato datetime (tipo).
-    """
+def normalize_datetime_columns(df):
+    """Convierte la fecha de procesamiento de string a datetime de Pandas."""
+
     df["processed_timestamp"] = pd.to_datetime(df["processed_timestamp"])
 
     return df
 
-# 4. Función Orquestadora de Transformación
+def clean_and_normalize(df):
+    """Estandariza los tipos de datos y formatos del DataFrame"""
 
-def clean_and_normalize(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Estandariza los tipos de datos y formatos del DataFrame (Transformación Pura).
-    
-    Args:
-        df (pd.DataFrame): DataFrame desde Bronze.
-        
-    Returns:
-        pd.DataFrame: DataFrame listo para auditoría de calidad.
-    """
     df = cast_numeric_columns(df)
     df = normalize_string_columns(df)
     df = normalize_datetime_columns(df)
 
     return df
 
-# 5. Orquestador del Pipeline ETL
-
-def start_transformation_process(execution_date: str):
+def start_transformation_process(execution_date):
     """
     Orquesta la transformación desde la ingesta JSON cruda hasta el CSV particionado Silver.
     
@@ -157,24 +112,13 @@ def start_transformation_process(execution_date: str):
     ]
     df = df.reindex(columns=expected_columns)
 
-    # Validación del esquema y volumen del df
-
     validate_schema_and_volume(df, expected_columns)
-    
-    # Logging estadístico técnico
 
     logging.info(f"Total de Filas antes de Transformar: {len(df)}")
     logging.info(f"Tipos de Datos antes de Transformar:\n{df.dtypes}")
 
-    # Transformación de datos
-
     df = clean_and_normalize(df)
-
-    # Aplicar Data Quality
-
     df = apply_data_quality(df)
-
-    # Guardar Silver
 
     silver_output_directory = SILVER_FOLDER / f"year={execution_datetime.year}" / f"month={execution_datetime.month:02d}" / f"day={execution_datetime.day:02d}"
     silver_output_directory.mkdir(parents=True, exist_ok=True)
@@ -184,12 +128,7 @@ def start_transformation_process(execution_date: str):
     
     logging.info(f"Transformación exitosa. Archivo guardado en Silver: {silver_filename}")
 
-# 6. Ejecución Manual
-
 if __name__ == "__main__":
-
-    # Prueba manual: Ejecuta la transformación directamente sin Airflow.
-    # Busca el archivo Bronze con la fecha actual y lo procesa hacia Silver.
 
     test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
     start_transformation_process(test_date)

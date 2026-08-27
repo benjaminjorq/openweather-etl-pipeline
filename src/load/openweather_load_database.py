@@ -1,14 +1,4 @@
 
-"""
-Módulo de Carga (Gold Layer) - OpenWeather ETL.
-
-Lee el archivo CSV de la capa Silver correspondiente a la fecha de ejecución
-y lo carga a PostgreSQL. Primero inserta los datos en una tabla de staging,
-luego ejecuta las transformaciones SQL hacia el Data Warehouse en esquema estrella.
-
-"""
-
-
 import pandas as pd
 import logging
 import os
@@ -17,16 +7,12 @@ from sqlalchemy import create_engine, text
 from pathlib import Path
 from datetime import datetime
 
-# 1. Configuración de Rutas
-
 load_dotenv()
 
 BASE_DIR = Path("/opt/airflow")
 LOG_DIR = BASE_DIR / "logs"
 SILVER_FOLDER = BASE_DIR / "data/silver"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-# 2. Configuración de Logs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,8 +22,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
-# 3. Configuración de Conexión a la Base de Datos
 
 def create_db_engine():
     """
@@ -63,10 +47,9 @@ def create_db_engine():
     except Exception as e:
         logging.critical(f"Error configurando motor de base de datos: {e}")
         raise RuntimeError(f"No se pudo establecer la conexión a la base de datos: {e}")
+    
 
-# 4. Obtención del Archivo Silver Particionado
-
-def get_target_silver_file(execution_date: str):
+def get_target_silver_file(execution_date):
     """
     Obtiene el archivo CSV de la capa Silver correspondiente a la fecha de ejecución.
 
@@ -89,9 +72,8 @@ def get_target_silver_file(execution_date: str):
         
     return target_path
 
-# 5. Carga a Staging y Traspaso al Data Warehouse
 
-def load_to_gold(df: pd.DataFrame, engine) -> None:
+def load_to_gold(df, engine):
     """
     Carga los datos en la tabla de staging y ejecuta las transformaciones SQL
     hacia las tablas del Data Warehouse en esquema estrella.
@@ -108,8 +90,6 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
     """
 
     with engine.begin() as connection:
-
-        # Etapa 1: Staging 
         # Se trunca antes de insertar para evitar registros duplicados.
         # Si Airflow reintenta esta tarea, la staging siempre parte limpia.
 
@@ -119,9 +99,6 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
         df.to_sql(name="weather_staging_table", con=connection, if_exists="append", index=False, schema="public", method="multi")
 
         logging.info(f"Carga a Staging exitosa: {len(df)} registros insertados.")
-        
-        # Etapa 2: Data Warehouse
-
         logging.info("Iniciando traspaso al Data Warehouse (Star Schema)")
         
         query = """
@@ -176,9 +153,8 @@ def load_to_gold(df: pd.DataFrame, engine) -> None:
         connection.execute(text(query))
         logging.info("Traspaso a Capa Gold completado con éxito. Data Warehouse actualizado.")
 
-# 6. Orquestador del pipeline
 
-def start_database_load(execution_date: str):
+def start_database_load(execution_date):
     """
     Ejecuta el proceso completo de carga desde la capa Silver hacia PostgreSQL.
 
@@ -211,12 +187,7 @@ def start_database_load(execution_date: str):
         logging.critical("Fallo durante el proceso de carga.")
         raise RuntimeError("Falla en la etapa de carga.") from e
     
-# 7. Ejecución 
-
 if __name__ == "__main__":
-
-    # Prueba manual: Ejecuta la carga directamente sin Airflow.
-    # Busca el archivo Silver con la fecha actual y lo inserta en PostgreSQL.
 
     test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
     start_database_load(execution_date=test_date)

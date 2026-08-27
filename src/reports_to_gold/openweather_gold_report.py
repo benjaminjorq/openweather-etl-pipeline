@@ -1,37 +1,20 @@
 
-"""
-Módulo de Reportes (Gold Layer) - OpenWeather ETL.
-
-Consolida las ejecuciones diarias desde la capa Silver y genera reportes
-analíticos exportados como CSV hacia la capa Gold:
-  - Ranking Top 7 ciudades más contaminadas del día.
-  - Resumen de promedios diarios agrupados por país.
-
-"""
-
 import pandas as pd
 import logging
 from datetime import datetime
 from pathlib import Path
 
-# 1. Configuración de Rutas
-
 BASE_DIR = Path("/opt/airflow")
 LOG_DIR = BASE_DIR / "logs"
 SILVER_FOLDER = BASE_DIR / "data/silver"
 GOLD_FOLDER = BASE_DIR / "data/gold"
-
 RANKING_DIR = GOLD_FOLDER / "ranking"
 SUMMARY_DIR = GOLD_FOLDER / "summary"
-
-# 2. Creación de carpetas
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 GOLD_FOLDER.mkdir(parents=True, exist_ok=True)
 RANKING_DIR.mkdir(parents=True, exist_ok=True)
 SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
-
-# 3. Configuración de Logs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,8 +24,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
-# 4. Función: Indicador de Negocio
 
 def get_overall_status(aqi_mean):
     """
@@ -59,6 +40,7 @@ def get_overall_status(aqi_mean):
     """
     if pd.isna(aqi_mean): 
         return "Desconocido"
+        
     if aqi_mean <= 1.5: 
         return "Excelente"
     elif aqi_mean <= 2.5: 
@@ -70,9 +52,8 @@ def get_overall_status(aqi_mean):
     else: 
         return "Peligroso"
 
-# 5. Proceso Principal
 
-def create_gold_reports(execution_date_short: str):
+def create_gold_reports(execution_date_short):
     """
     Consolida las ejecuciones del día y genera los reportes analíticos Gold.
 
@@ -84,7 +65,6 @@ def create_gold_reports(execution_date_short: str):
     Args:
         execution_date_short (str): Fecha del día a procesar en formato YYYYMMDD.
     """
-
     logging.info(f"Generando reportes para el día: {execution_date_short}")
     
     target_dt = datetime.strptime(execution_date_short, "%Y%m%d")
@@ -95,12 +75,12 @@ def create_gold_reports(execution_date_short: str):
         return
         
     daily_files = list(daily_silver_path.glob("clean_weather_data_*.csv"))
+    
     if not daily_files:
         logging.warning("La carpeta existe pero está vacía.")
         return
 
     # Consolidar todos los CSV del día en un único DataFrame
-
     dataframes = [pd.read_csv(file) for file in daily_files]
     raw_df = pd.concat(dataframes, ignore_index=True)
 
@@ -112,32 +92,26 @@ def create_gold_reports(execution_date_short: str):
     ]
     
     # Calcular promedio diario por ciudad y país
-
     df = raw_df.groupby(["city", "country"])[numeric_cols].mean().reset_index().round(1)
     logging.info(f"Registros únicos tras calcular el promedio diario: {len(df)}")
 
     # Clasificar calidad del aire y ordenar de más a menos contaminado
-
     df["overall_status"] = df["aqi"].apply(get_overall_status)
     df = df.sort_values(by=["aqi", "pm2_5_level"], ascending=False)
 
     # C. Particiones por fecha para los archivos de salida
-
     date_suffix = target_dt.strftime("%Y_%m_%d")
 
     # REPORTE 1: Ranking Top 7 Ciudades más Contaminadas
-
     top7_df = df.head(7)
 
     # A. Columnas a exportar en el CSV
-
     ranking_cols = [
         "city", "country", "temperature_c", "humidity_pct", "wind_speed_ms", "pressure_hpa", 
         "aqi", "pm2_5_level", "pm10_level", "co_level", "no2_level", "o3_level", "overall_status"
     ]
 
     # B. Mapeo de columnas para visualización en logs
-
     ranking_views = {
         "city": "Ciudad", "country": "Pais",
         "temperature_c": "Temp", "humidity_pct": "Hum %",
@@ -148,30 +122,26 @@ def create_gold_reports(execution_date_short: str):
     }
 
     # C. Guardar CSV en la capa Gold
-
     ranking_path = RANKING_DIR / f"ranking_pollution_{date_suffix}.csv"
     top7_df[ranking_cols].to_csv(ranking_path, index=False)
     
     # D. Imprimir tabla en logs
-
     logging.info("Ranking Top 7 Contaminación")
     ranking_df = top7_df[list(ranking_views.keys())].rename(columns=ranking_views)
     logging.info("\n" + ranking_df.to_string(index=False, justify='left'))
     logging.info(f"\nGuardado en: {ranking_path.name}")
 
+
     # REPORTE 2: Resumen de Promedios por País
     
     # A. Calcular promedios numéricos agrupados por país
-
     summary_df = df.groupby("country")[numeric_cols].mean().reset_index().round(1)
 
     # B. Clasificar calidad del aire y ordenar de más a menos contaminado
-
     summary_df["overall_status"] = summary_df["aqi"].apply(get_overall_status)
     summary_df = summary_df.sort_values(by="aqi", ascending=False)
 
     # C. Mapeo de columnas para visualización en logs
-
     summary_views = {
         "country": "Pais",
         "temperature_c": "Temp", "humidity_pct": "Hum %",
@@ -182,25 +152,17 @@ def create_gold_reports(execution_date_short: str):
     }
     
     # D. Guardar CSV en la capa Gold
-
     summary_path = SUMMARY_DIR / f"summary_country_{date_suffix}.csv"
     summary_df.to_csv(summary_path, index=False)
     
     # E. Imprimir tabla en logs
-
     logging.info(" Resumen Promedio por Pais (Vista Previa): ")
     view_summary = summary_df[list(summary_views.keys())].rename(columns=summary_views)
     logging.info("\n" + view_summary.to_string(index=False, justify='left'))
     logging.info(f"\nGuardado en: {summary_path.name}")
 
-# 6. Ejecución 
 
 if __name__ == "__main__":
-        
-        # Prueba manual: Ejecuta el reporte directamente sin Airflow.
-        # Consolida todos los CSV del día actual y genera los reportes Gold.
-
+          
         test_date = datetime.now().strftime('%Y%m%d')
-        create_gold_reports(execution_date_short=test_date)
-
-    
+        create_gold_reports(test_date)

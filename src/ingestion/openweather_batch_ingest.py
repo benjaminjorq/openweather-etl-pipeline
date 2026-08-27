@@ -1,13 +1,4 @@
 
-"""
-Módulo de Ingesta (Bronze Layer) - OpenWeather ETL.
-
-Responsable de extraer datos meteorológicos y de contaminación desde la API 
-de OpenWeather para una lista de ciudades configuradas (cities.yaml).
-Los datos crudos se almacenan en formato JSON en la capa Bronze.
-
-"""
-
 import requests
 import json
 import logging
@@ -17,7 +8,6 @@ from dotenv import load_dotenv
 from datetime import datetime
 from pathlib import Path
 
-# 1. Configuración de Entorno y Rutas
 
 load_dotenv()
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
@@ -26,8 +16,6 @@ BASE_DIR = Path("/opt/airflow")
 LOG_DIR = BASE_DIR / "logs"
 BRONZE_FOLDER = BASE_DIR / "data/bronze"
 CITIES_FILE = BASE_DIR / "config/cities.yaml"
-
-# 2. Setup Inicial (Directorios y Logs)
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 BRONZE_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -40,8 +28,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
-# 3. Función Auxiliar: Cargar Ciudades
 
 def load_cities_config():
     """
@@ -67,9 +53,8 @@ def load_cities_config():
         logging.error(f"Error leyendo YAML: {e}")
         raise RuntimeError("Fallo procesando archivo YAML") from e
 
-# 4. API 1: Obtener Datos del Clima (Weather)
 
-def get_weather_data(lat:float, lon:float):
+def get_weather_data(lat, lon):
     """
     Obtiene los datos meteorológicos para unas coordenadas definidas.
 
@@ -96,9 +81,8 @@ def get_weather_data(lat:float, lon:float):
         logging.error(f"API Weather Error de conexión: {e}")
         return None
 
-# 5. API 2: Obtener Datos de Polución (Air Pollution)
 
-def get_pollution_data(lat:float, lon:float):
+def get_pollution_data(lat, lon):
     """
     Obtiene los datos de contaminación atmosférica para unas coordenadas definidas.
 
@@ -125,9 +109,8 @@ def get_pollution_data(lat:float, lon:float):
         logging.error(f"API Air Pollution - Error de conexión: {e}")
         return None
 
-# 6. Proceso Principal
 
-def start_ingestion_process(execution_date: str):
+def start_ingestion_process(execution_date):
     """
     Ejecuta el proceso de ingesta de datos desde APIs externas hacia la capa Bronze.
 
@@ -179,12 +162,7 @@ def start_ingestion_process(execution_date: str):
 
         logging.info(f"Archivo guardado en Bronze: {filename}")
 
-    # 7. Ejecución
-
 if __name__ == "__main__":
-
-    # Prueba manual: Ejecuta la ingesta directamente sin Airflow.
-    # Genera la fecha actual y descarga los datos de la API hacia Bronze.
 
     test_date = datetime.now().strftime('%Y%m%dT%H%M%S')
     start_ingestion_process(execution_date=test_date)
