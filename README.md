@@ -1,4 +1,4 @@
-# ☀️ OpenWeather ETL Pipeline
+# OpenWeather ETL Pipeline
 
 ---
 
